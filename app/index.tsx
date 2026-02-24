@@ -8,6 +8,7 @@ export default function LandingPage() {
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
+        gap: 20,
       }}
     >
       <Text>Hello niños!!</Text>
