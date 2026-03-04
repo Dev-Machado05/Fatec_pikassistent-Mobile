@@ -4,15 +4,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function RootLayout() {
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.header}>
         <Text>Header</Text>
       </View>
-      <Slot />
-      <View style={styles.footer}>
-        <Text>Footer</Text>
-      </View>
-    </SafeAreaView>
+      <Slot/>
+    </View>
     // SafeAreaView é pra evitar que o conteúdo fique embaixo do notch ou da barra de navegação em alguns dispositivos
     // Eu não consigo testar isso ^ pq to pelo browser -Vitor
   ) 
@@ -27,16 +24,12 @@ const styles = StyleSheet.create({
   },
   header: {
     width: "100%",
-    height: 50,
-    backgroundColor: "red",
+    height: 70,
+    backgroundColor: "#58A8C0",
+    borderBottomWidth: 1,
+    borderBottomColor: "black",
     alignItems: "center",
-    justifyContent: "center",
-  },
-  footer: {
-    width: "100%",
-    height: 50,
-    backgroundColor: "blue",
-    alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "flex-end",
+    paddingBottom: 10,
   },
 }); 
