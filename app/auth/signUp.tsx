@@ -1,3 +1,6 @@
+import { Picker } from "@react-native-picker/picker";
+import { Link } from "expo-router";
+import React, { useState } from "react";
 import {
   ImageBackground,
   Pressable,
@@ -6,9 +9,6 @@ import {
   TextInput,
   View,
 } from "react-native";
-import React, { useState } from "react";
-import { Link } from "expo-router";
-import { Picker } from "@react-native-picker/picker";
 
 export default function signUp() {
   const [email, setEmail] = useState<string>("");
@@ -109,7 +109,14 @@ export default function signUp() {
             <View style={styles.signUpInputContainer}>
               <Text style={styles.signUpInputLabel}>Time pokemon:</Text>
               <Picker
-                style={[styles.signUpInput, {borderWidth: 1, borderColor: "#000000", backgroundColor: "#ffffff"}]}
+                style={[
+                  styles.signUpInput,
+                  {
+                    borderWidth: 1,
+                    borderColor: "#000000",
+                    backgroundColor: "#ffffff",
+                  },
+                ]}
                 selectedValue={team}
                 onValueChange={(value, index) => setTeam(value as string)}
               >
@@ -154,12 +161,15 @@ export default function signUp() {
 }
 
 const styles = StyleSheet.create({
+  // backgrount Image
   backgroundImage: {
     height: "100%",
     width: "100%",
     justifyContent: "center",
     alignItems: "center",
   },
+
+  // form
   signUpFormContainer: {
     width: "80%",
     justifyContent: "center",
@@ -179,6 +189,8 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   signUpFormContent: { width: "85%", alignItems: "center", gap: 15 },
+
+  // input section
   signUpInputContainer: { width: "100%" },
   signUpInputLabel: {
     color: "#000000",
@@ -194,7 +206,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#000000",
   },
+
+  // signUp link
   gotoLoginLink: { color: "blue", textDecorationLine: "underline" },
+
+  // buttons section
   signUpButtonContainer: {
     height: "auto",
     width: "100%",
@@ -223,4 +239,3 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 });
-
