@@ -1,11 +1,13 @@
 import { Slot } from "expo-router";
 import { View, Text, StyleSheet } from "react-native";
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function RootLayout() {
+  const insets = useSafeAreaInsets();
+
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <View style={[styles.header, {paddingTop: insets.top}]}>
         <Text>Header</Text>
       </View>
       <Slot/>
@@ -19,17 +21,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
   },
   header: {
     width: "100%",
-    height: 70,
+    height: "auto",
     backgroundColor: "#58A8C0",
     borderBottomWidth: 1,
     borderBottomColor: "black",
     alignItems: "center",
-    justifyContent: "flex-end",
+    justifyContent: "center",
     paddingBottom: 10,
   },
 }); 
