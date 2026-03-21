@@ -127,7 +127,7 @@ export default function signUp() {
               </Picker>
             </View>
             {/* signUp link */}
-            <Link href={"./"} style={styles.gotoLoginLink}>
+            <Link href={"/auth/login"} style={styles.gotoLoginLink}>
               Já tem uma conta? Conecte-se!
             </Link>
           </View>

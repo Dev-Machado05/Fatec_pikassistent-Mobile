@@ -1,3 +1,4 @@
+import getScreenSize from "@/assets/hooks/getScreenSize";
 import { Link } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -11,66 +12,50 @@ import {
   View,
 } from "react-native";
 
-const screenHeight = Dimensions.get("window").height;
-const screenWidth = Dimensions.get("window").width;
-
 export default function LandingPage() {
-  const [loggedIn, setLoggedIn] = useState(false); // add function to fetch if someone is logged
-  
-  useEffect(() => {
-    if (loggedIn) {
-      // goto your home page
-    } else {
-      // keep in here
-    }
-  });
-
   return (
     <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
       {/* Hero Section */}
-      <View style={styles.heroContainer}>
-        <ImageBackground
-          source={require("../../assets/images/Bg1.png")}
-          resizeMode="cover"
-          style={styles.backgroundImage}
-        >
-          <View style={styles.heroSection}>
-            <View style={styles.titleContainer}>
-              <Text style={styles.mainTitle}>
-                conheça o{" "}
-                <Text style={styles.titleHighlight}>Pikassistent</Text>
-              </Text>
-              <Text style={styles.slogan}>
-                Seu Assistente Pokémon Definitivo!
-              </Text>
-            </View>
-
-            <Link href={"./"} asChild>
-              <Pressable style={styles.ctaButton}>
-                <Text style={styles.ctaButtonText}>
-                  ⚡ Comece a montar a sua jornada aqui!
-                </Text>
-              </Pressable>
-            </Link>
-
-            <View style={styles.heroIntro}>
-              <Text style={styles.introTitle}>O Que é o Pikassistent?</Text>
-              <Text style={styles.introText}>
-                Uma plataforma completa para treinadores Pokémon que une
-                inteligência artificial, comunidade e ferramentas estratégicas.
-                Nossa missão é ajudar você a se tornar um Mestre Pokémon com
-                recursos inovadores e uma experiência única.
-              </Text>
-            </View>
+      <ImageBackground
+        source={require("../../assets/images/Bg1.png")}
+        resizeMode="cover"
+        style={styles.heroContainer}
+      >
+        <View style={styles.heroSection}>
+          <View style={styles.titleContainer}>
+            <Text style={styles.mainTitle}>
+              conheça o <Text style={styles.titleHighlight}>Pikassistent</Text>
+            </Text>
+            <Text style={styles.slogan}>
+              Seu Assistente Pokémon Definitivo!
+            </Text>
           </View>
 
-          {/* scroll hint */}
-          <View style={styles.scrollHint}>
-            <Text style={styles.scrollHintText}>Desça para explorar mais</Text>
-            <Image source={require("../../assets/images/downArrow.png")} />
+          <Link href={"./home"} asChild>
+            <Pressable style={styles.ctaButton}>
+              <Text style={styles.ctaButtonText}>
+                ⚡ Comece a montar a sua jornada aqui!
+              </Text>
+            </Pressable>
+          </Link>
+
+          <View style={styles.heroIntro}>
+            <Text style={styles.introTitle}>O Que é o Pikassistent?</Text>
+            <Text style={styles.introText}>
+              Uma plataforma completa para treinadores Pokémon que une
+              inteligência artificial, comunidade e ferramentas estratégicas.
+              Nossa missão é ajudar você a se tornar um Mestre Pokémon com
+              recursos inovadores e uma experiência única.
+            </Text>
           </View>
-        </ImageBackground>
-      </View>
+        </View>
+
+        {/* scroll hint */}
+        <View style={styles.scrollHint}>
+          <Text style={styles.scrollHintText}>Desça para explorar mais</Text>
+          <Image source={require("../../assets/images/downArrow.png")} />
+        </View>
+      </ImageBackground>
 
       {/* Missions Section */}
       <View style={styles.infoContainer}>
@@ -184,7 +169,7 @@ export default function LandingPage() {
           </View>
         </View>
       </View>
-      
+
       {/* Footer */}
       <View style={styles.footerContainer}>
         <Text style={styles.footerTagline}>
@@ -204,13 +189,9 @@ export default function LandingPage() {
 const styles = StyleSheet.create({
   // Hero Section
   heroContainer: {
-    height: screenHeight,
-    width: screenWidth,
-  },
-  backgroundImage: {
+    height: getScreenSize("height"),
+    width: getScreenSize("width"),
     flex: 1,
-    width: "100%",
-    justifyContent: "space-between",
   },
   heroSection: {
     flex: 1,
@@ -242,10 +223,8 @@ const styles = StyleSheet.create({
     marginTop: 35,
     backgroundColor: "#FD7932",
     maxWidth: "80%",
-    paddingTop: 15,
-    paddingBottom: 15,
-    paddingStart: 20,
-    paddingEnd: 20,
+    paddingVertical: 15,
+    paddingHorizontal: 20,
     borderRadius: 15,
   },
   ctaButtonText: {
@@ -280,7 +259,7 @@ const styles = StyleSheet.create({
 
   // Missions / Info Section
   infoContainer: {
-    width: screenWidth,
+    width: getScreenSize("width"),
     backgroundColor: "#c9deff",
     alignItems: "center",
     paddingTop: 80,

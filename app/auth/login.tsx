@@ -34,10 +34,15 @@ export default function login() {
               <Text style={styles.loginInputLabel}>Senha:</Text>
               <TextInput style={styles.loginInput} onChangeText={setPassword} />
             </View>
-            {/* signUp link */}
-            <Link href={"/auth/signUp"} style={styles.gotoSignUpLink}>
-              não tem uma conta? Cadastre-se!
-            </Link>
+            {/* login links */}
+            <View>
+              <Link href={"/auth/signUp"} style={styles.gotoSignUpLink}>
+                Esqueceu a senha?
+              </Link>
+              <Link href={"/auth/signUp"} style={styles.gotoSignUpLink}>
+                não tem uma conta? Cadastre-se!
+              </Link>
+            </View>
           </View>
           {/* buttons section */}
           <View style={styles.loginButtonContainer}>
@@ -119,7 +124,7 @@ const styles = StyleSheet.create({
     borderColor: "#000000",
   },
 
-  // signUp link
+  // login links
   gotoSignUpLink: {
     color: "blue",
     textDecorationLine: "underline",

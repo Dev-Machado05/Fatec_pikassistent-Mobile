@@ -9,7 +9,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 //   email: String
 // }
 
-type possibleTargets = "/auth/login" | "/landingPage";
+type possibleTargets = "/home" | "/landingPage";
 
 export default function index() {
   const [targetPage, setTargetPage] = useState<possibleTargets | null>(null);
@@ -20,14 +20,15 @@ export default function index() {
         let token = await AsyncStorage.getItem("userToken");
         let val = true; // validar tokem no back via api
 
-        if (!val) {
+        if (!token) {
           setTargetPage("/landingPage");
         }
 
-        if (!token) {
-          setTargetPage("/landingPage");
+        if (val) {
+          setTargetPage("/home");
         } else {
-          setTargetPage("/auth/login"); // trocar para a home do usuário
+          await AsyncStorage.setItem("recentAccess", "[]")
+          setTargetPage("/landingPage");
         }
       } catch {
         setTargetPage("/landingPage");

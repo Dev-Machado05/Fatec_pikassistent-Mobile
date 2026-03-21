@@ -23,6 +23,7 @@ export default function _layout() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    width: "100%",
     backgroundColor: "#000",
   },
   content: {
