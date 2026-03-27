@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import React from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Slot } from "expo-router";
+import { router, Slot } from "expo-router";
 import getScreenSize from "@/assets/hooks/getScreenSize";
 
 export default function _layout() {
@@ -36,7 +36,9 @@ export default function _layout() {
             resizeMode="contain"
           />
         </Pressable>
-        <Pressable style={styles.footerButtonContainer} onPress={() => {}}>
+        <Pressable style={styles.footerButtonContainer} onPress={() => {
+          router.push("/chatBot");
+        }}>
           <Image
             source={require("../../assets/images/premierball.png")}
             style={styles.footerButtonImage}

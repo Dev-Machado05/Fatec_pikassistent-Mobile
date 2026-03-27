@@ -13,13 +13,15 @@ import {
   View,
 } from "react-native";
 import PokedexCarroussel from "./components/homePokedexCarroussel/homePokedexCarroussel";
+import { useRouter } from "expo-router";
 
 type recentItemsList = {
   recentOption: { url: string };
 };
 
 export default function home() {
-  const navigation = useNavigation<NavigationProp<recentItemsList>>();
+  const router = useRouter();
+  // const navigation = useNavigation<NavigationProp<recentItemsList>>();
   const [searchItem, setSearchItem] = useState<string>("");
   const [recentAccess, setRecentAccess] = useState<
     Array<{ name: string; url: string }>
@@ -79,11 +81,11 @@ export default function home() {
         setRecentAccess([]);
       }
     }
-    getRecentAccess().then(() => {
+    getRecentAccess().then(() => {  // change this logic
       setRecentAccess([
-        { name: "pokedex", url: "/" },
+        { name: "pokedex", url: "/Pokedex" },
         { name: "chatGlobal", url: "/" },
-        { name: "chatBot", url: "/" },
+        { name: "chatBot", url: "/chatBot" },
       ]);
       setFetchedRecent(true);
     });
@@ -138,7 +140,7 @@ export default function home() {
                   <Pressable
                     key={index}
                     onPress={() => {
-                      navigation.navigate("recentOption", { url: value.url });
+                      router.push(value.url as any);
                     }}
                     style={styles.recentAccessItemContainer}
                   >
@@ -303,5 +305,5 @@ const styles = StyleSheet.create({
     width: "80%",
     fontSize: 18,
     fontWeight: "600",
-  }
+  },
 });

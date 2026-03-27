@@ -156,7 +156,7 @@ export default function LandingPage() {
 
           {/* botões autentificação */}
           <View style={styles.authContainer}>
-            <Link href={"./"} asChild>
+            <Link href={"./auth/signUp"} asChild>
               <Pressable style={styles.signUpButton}>
                 <Text style={styles.signUpButtonText}>Criar Conta Grátis</Text>
               </Pressable>
