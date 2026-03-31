@@ -1,118 +1,177 @@
+import { useState } from "react";
 import {
   Image,
   ImageBackground,
   ScrollView,
   StyleSheet,
   Text,
-  View,
+  TextInput, TouchableOpacity,
+  View
 } from "react-native";
-import React, { useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function index() {
   const insets = useSafeAreaInsets();
-  const [fetchedMessages, setFetchedMessages] = useState<boolean>(true);
-  const messages = [
-    {
-      message: "random example text",
-      sender: "user",
-    },
-    {
-      message: "chat answer",
-      sender: "bot",
-    },
-  ];
-  return (
-    <ImageBackground
-      style={styles.chatBotContent}
-      source={require("../../assets/images/Bg2.png")}
-      resizeMode="cover"
-    >
-      <ScrollView contentContainerStyle={styles.messagesContainer}>
-        {fetchedMessages
-          ? messages.map((item, index) => (
-              <View
-                style={
-                  item.sender === "user"
-                    ? styles.userMessagecontent
-                    : styles.botMessagecontent
-                }
-                key={index}
-              >
-                <Text style={[styles.messageText, item.sender === "user" ? styles.userMessageText : styles.botMessageText]}>{item.message}</Text>
-                {item.sender === "user" ? (
-                  <Image
-                    style={styles.messageIcon}
-                    source={require("../../assets/images/masterBall.png")}
-                    resizeMode="contain"
-                  />
-                ) : (
-                  <Image
-                    style={styles.messageIcon}
-                    source={require("../../assets/images/pika.png")}
-                    resizeMode="contain"
-                  />
-                )}
-              </View>
-            ))
-          : null}
-      </ScrollView>
-    </ImageBackground>
-  );
-}
+  const [messages, setMessages] = useState<any[]>([]);
+  const [inputText, setInputText] = useState("");
+  function sendMessage() {
+    if (!inputText.trim()) return;
 
+    const newMessage = {
+      message: inputText,
+      sender: "user",
+      id: crypto.randomUUID(),
+    };
+
+    const updatedMessages = [...messages, newMessage];
+    setMessages(updatedMessages);
+    setInputText("");
+
+    fetch("http://10.0.2.2:7070/api/chat") // ⚠️ 
+      .then((res) => res.json())
+      .then((data) => {
+        setMessages((prev) => [
+          ...prev,
+          {
+            message: data.response || "Erro na resposta",
+            sender: "bot",
+            id: crypto.randomUUID(),
+          },
+        ]);
+      })
+      .catch(() => {
+        setMessages((prev) => [
+          ...prev,
+          {
+            message: "Erro ao conectar com servidor",
+            sender: "bot",
+            id: crypto.randomUUID(),
+          },
+        ]);
+      });
+}
+  return (
+  <ImageBackground
+    style={styles.chatBotContent}
+    source={require("../../assets/images/Bg2.png")}
+    resizeMode="cover"
+  >
+    <ScrollView contentContainerStyle={styles.messagesContainer}>
+      {messages.map((item) => (
+        <View
+          key={item.id}
+          style={
+            item.sender === "user"
+              ? styles.userMessagecontent
+              : styles.botMessagecontent
+          }
+        >
+          <Text
+            style={[
+              styles.messageText,
+              item.sender === "user"
+                ? styles.userMessageText
+                : styles.botMessageText,
+            ]}
+          >
+            {item.message}
+          </Text>
+
+          {item.sender === "user" ? (
+            <Image
+              style={styles.messageIcon}
+              source={require("../../assets/images/masterBall.png")}
+              resizeMode="contain"
+            />
+          ) : (
+            <Image
+              style={styles.messageIcon}
+              source={require("../../assets/images/pika.png")}
+              resizeMode="contain"
+            />
+          )}
+        </View>
+      ))}
+    </ScrollView>
+
+    <View style={styles.inputArea}>
+      <TextInput
+        style={styles.input}
+        value={inputText}
+        onChangeText={setInputText}
+        placeholder="Digite sua mensagem..."
+      />
+
+      <TouchableOpacity style={styles.button} onPress={sendMessage}>
+        <Text style={{ color: "#fff" }}>Enviar</Text>
+      </TouchableOpacity>
+    </View>
+  </ImageBackground>
+);
+}
 const styles = StyleSheet.create({
   chatBotContent: {
-    height: "100%",
+    flex: 1,
   },
+
   messagesContainer: {
-    width: "100%",
     padding: 15,
-    alignItems: "flex-start",
-    gap: 20,
+    paddingBottom: 100,
   },
+
   userMessagecontent: {
-    width: "auto",
     alignSelf: "flex-end",
     flexDirection: "row",
-},
-botMessagecontent: {
-    width: "auto",
+    marginVertical: 10,
+  },
+
+  botMessagecontent: {
+    alignSelf: "flex-start",
     flexDirection: "row-reverse",
-    justifyContent: "center",
-    alignItems: "center",
+    marginVertical: 10,
   },
+
   messageText: {
-    width: "auto",
-    paddingVertical: 15,
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#ffffff",
+    color: "#fff",
+    padding: 12,
   },
+
   userMessageText: {
-    paddingLeft: 25,
-    paddingRight: 40,
     backgroundColor: "#FD7932",
-    borderWidth: 1,
-    borderColor: "#000000",
-    borderTopLeftRadius: 5,
-    borderTopRightRadius: 0,
-    borderBottomLeftRadius: 15,
-    borderBottomRightRadius: 5,
+    borderRadius: 10,
   },
+
   botMessageText: {
-    paddingLeft: 40,
-    paddingRight: 25,
-    borderWidth: 1,
-    borderColor: "#000000",
     backgroundColor: "#347CEC",
-    borderTopLeftRadius: 0,
-    borderTopRightRadius: 5,
-    borderBottomLeftRadius: 5,
-    borderBottomRightRadius: 15,
+    borderRadius: 10,
   },
+
   messageIcon: {
-    height: 50,
-    width: 50,
+    width: 40,
+    height: 40,
+  },
+
+  inputArea: {
+    position: "absolute",
+    bottom: 0,
+    width: "100%",
+    flexDirection: "row",
+    padding: 10,
+    backgroundColor: "#2e86ab",
+  },
+
+  input: {
+    flex: 1,
+    backgroundColor: "#fff",
+    borderRadius: 6,
+    paddingHorizontal: 10,
+  },
+
+  button: {
+    marginLeft: 10,
+    backgroundColor: "#ff7a29",
+    paddingHorizontal: 15,
+    justifyContent: "center",
+    borderRadius: 6,
   },
 });
