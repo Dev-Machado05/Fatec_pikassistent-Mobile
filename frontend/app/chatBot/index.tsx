@@ -6,9 +6,25 @@ import {
   StyleSheet,
   Text,
   TextInput, TouchableOpacity,
-  View
+  View,
+  Platform
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Constants from 'expo-constants';
+
+
+const getApiUrl = () => {
+  if (Platform.OS === 'android' && !Constants.isDevice) {
+    return 'http://10.0.2.2:7070';
+  }
+  if ((Platform.OS === 'ios' && !Constants.isDevice) || Platform.OS === 'web') {
+    return 'http://localhost:7070';
+  }
+  return process.env.EXPO_PUBLIC_API_URL || 'http://localhost:7070';
+};
+
+const API_URL = getApiUrl();
+
 
 export default function index() {
   const insets = useSafeAreaInsets();
@@ -27,8 +43,19 @@ export default function index() {
     setMessages(updatedMessages);
     setInputText("");
 
-    fetch("http://10.0.2.2:7070/api/chat") // ⚠️ 
-      .then((res) => res.json())
+    fetch(`${API_URL}/api/chat`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ message: inputText }),
+    })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("HTTP error " + res.status);
+        }
+        return res.json();
+      })
       .then((data) => {
         setMessages((prev) => [
           ...prev,

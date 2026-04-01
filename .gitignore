@@ -32,6 +32,7 @@ yarn-error.*
 
 # local env files
 .env*.local
+.env
 
 # typescript
 *.tsbuildinfo
@@ -44,4 +45,5 @@ app-example
 
 .vscode/
 
-.idea/
+.idea/package-lock.json
+frontend/.gitignore
