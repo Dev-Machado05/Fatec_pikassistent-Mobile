@@ -45,5 +45,5 @@ app-example
 
 .vscode/
 
-.idea/package-lock.json
+/package-lock.json
 frontend/.gitignore
