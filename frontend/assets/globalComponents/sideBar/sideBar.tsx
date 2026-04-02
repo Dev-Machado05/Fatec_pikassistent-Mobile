@@ -19,7 +19,7 @@ export default function SideBar({
         <Pressable key={index} style={styles.sideBarContent} onPress={() => {
             router.push(item.link as any);
         }}>
-          <Image source={item.Icon} style={styles.sideBarIcon} />
+          <Image source={item.Icon} resizeMode="contain" style={styles.sideBarIcon} />
           <Text style={styles.sideBarTitle}>{item.name}</Text>
         </Pressable>
       ))}

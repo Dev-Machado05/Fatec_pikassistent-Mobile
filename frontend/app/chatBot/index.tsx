@@ -121,7 +121,7 @@ export default function index() {
       ))}
     </ScrollView>
 
-    <View style={styles.inputArea}>
+    <View style={[styles.inputArea, {paddingBottom: insets.bottom}]}>
       <TextInput
         style={styles.input}
         value={inputText}
@@ -165,12 +165,18 @@ const styles = StyleSheet.create({
 
   userMessageText: {
     backgroundColor: "#FD7932",
-    borderRadius: 10,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 5,
+    borderBottomLeftRadius: 15,
+    borderBottomRightRadius: 10,
   },
 
   botMessageText: {
     backgroundColor: "#347CEC",
-    borderRadius: 10,
+    borderTopLeftRadius: 5,
+    borderTopRightRadius: 10,
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 15,
   },
 
   messageIcon: {

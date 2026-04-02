@@ -9,14 +9,19 @@ export default function getSideMenuItems() {
       link: "/home" 
     },
     {
-        name: "Home",
-        Icon: require("../images/homeIcon.png"),
-        link: "/home" 
+        name: "chat Bot",
+        Icon: require("../images/premierball.png"),
+        link: "/chatBot" 
     },
     {
-        name: "Home",
-        Icon: require("../images/homeIcon.png"),
-        link: "/home" 
+      name: "chat Global",
+      Icon: require("../images/chatDefault.png"),
+      link: "/chatGlobal" 
+    },
+    {
+        name: "Pokedex",
+        Icon: require("../images/pokedexIcon.png"),
+        link: "/pokedex" 
     },
   ];
 

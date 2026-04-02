@@ -84,7 +84,7 @@ export default function home() {
     getRecentAccess().then(() => {  // change this logic
       setRecentAccess([
         { name: "pokedex", url: "/Pokedex" },
-        { name: "chatGlobal", url: "/" },
+        { name: "chatGlobal", url: "/chatGlobal" },
         { name: "chatBot", url: "/chatBot" },
       ]);
       setFetchedRecent(true);
