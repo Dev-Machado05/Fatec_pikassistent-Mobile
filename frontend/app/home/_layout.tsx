@@ -9,7 +9,6 @@ import {
 import React from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router, Slot } from "expo-router";
-import getScreenSize from "@/assets/hooks/getScreenSize";
 
 export default function _layout() {
   const insets = useSafeAreaInsets();
@@ -29,7 +28,9 @@ export default function _layout() {
         <Slot />
       </ScrollView>
       <View style={[styles.footer, { paddingBottom: insets.bottom }]}>
-        <Pressable style={styles.footerButtonContainer} onPress={() => {}}>
+        <Pressable style={styles.footerButtonContainer} onPress={() => {
+          router.push("/")
+        }}>
           <Image
             source={require("../../assets/images/pokedexIcon.png")}
             style={styles.footerButtonImage}
@@ -37,7 +38,7 @@ export default function _layout() {
           />
         </Pressable>
         <Pressable style={styles.footerButtonContainer} onPress={() => {
-          router.push("/chatBot");
+          router.push("/chatBot" as any);
         }}>
           <Image
             source={require("../../assets/images/premierball.png")}
@@ -45,7 +46,9 @@ export default function _layout() {
             resizeMode="contain"
           />
         </Pressable>
-        <Pressable style={styles.footerButtonContainer} onPress={() => {}}>
+        <Pressable style={styles.footerButtonContainer} onPress={() => {
+          router.push("/chatGlobal" as any);
+        }}>
           <Image
             source={require("../../assets/images/chatDefault.png")}
             style={styles.footerButtonImage}

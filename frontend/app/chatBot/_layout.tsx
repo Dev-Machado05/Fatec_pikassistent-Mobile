@@ -20,10 +20,9 @@ export default function _layout() {
         style={styles.chatBotContent}
         contentContainerStyle={styles.chatBotContentContainer}
       >
-        <SideBar pressedMenuButton={pressedMenuButton}/>
+        <SideBar pressedMenuButton={pressedMenuButton} />
         <Slot />
       </ScrollView>
-      <Footer />
     </View>
   );
 }

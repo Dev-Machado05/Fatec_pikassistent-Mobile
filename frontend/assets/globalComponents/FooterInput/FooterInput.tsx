@@ -9,15 +9,20 @@ import {
 import React, { useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-export default function Footer() {
+export default function Footer({
+  reqFunction,
+  type,
+}: {
+  reqFunction: Function;
+  type: "chatBot" | "chatGlobal";
+}) {
   const [writtedText, setWrittedText] = useState<String>("");
   const insets = useSafeAreaInsets();
 
   return (
-    <View style={[styles.chatBotFooter, { paddingBottom: insets.bottom }]}>
-      <View style={styles.inputWrapper}>
-        <TextInput
-          style={styles.chatBotInputContent}
+    <View style={[styles.footerInputContainer, { paddingBottom: insets.bottom }]}>
+      <TextInput
+          style={styles.footerTextInput}
           onChangeText={(text) => {
             setWrittedText(text);
           }}
@@ -26,41 +31,37 @@ export default function Footer() {
         />
         <Pressable
           onPress={() => {
-            console.log("message: " + writtedText);
+            reqFunction(writtedText)
           }}
+          style={styles.footerSubmitButton}
         >
-          <Image
-            source={require("../../images/sendIcon.png")}
-            style={styles.sendIcon}
-          />
+          <Text style={{ color: "#fff" }}>Enviar</Text>
         </Pressable>
-      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  chatBotFooter: {
-    backgroundColor: "#2790b1",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  inputWrapper: {
+  footerInputContainer: {
+    position: "absolute",
+    bottom: 0,
+    width: "100%",
     flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#f0f0f0",
-    borderRadius: 25,
     paddingHorizontal: 12,
-    gap: 8,
+    paddingVertical: 9,
+    backgroundColor: "#2790b1",
   },
-  chatBotInputContent: {
+  footerTextInput: {
     flex: 1,
-    paddingVertical: 10,
-    fontSize: 16,
-    color: "#333",
+    backgroundColor: "#ffffff",
+    borderRadius: 6,
+    paddingHorizontal: 10,
   },
-  sendIcon: {
-    width: 24,
-    height: 24,
+  footerSubmitButton: {
+    marginLeft: 10,
+    backgroundColor: "#ff7a29",
+    paddingHorizontal: 15,
+    justifyContent: "center",
+    borderRadius: 6,
   },
 });
