@@ -6,49 +6,57 @@ import {
   Text,
   View,
 } from "react-native";
-import React from "react";
+import React, { useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router, Slot } from "expo-router";
+import Header from "@/assets/globalComponents/Header/Header";
+import SideBar from "@/assets/globalComponents/sideBar/sideBar";
 
 export default function _layout() {
+  const [menuState, setMenuState] = useState<boolean>(false);
   const insets = useSafeAreaInsets();
+  const handleMenuPress = () => {
+    setMenuState(!menuState);
+  };
 
   return (
     <View style={styles.homeContainer}>
-      <View style={[styles.homeHeader, { paddingTop: insets.top }]}>
-        <Pressable style={styles.headerMenuContainer}>
-          <Image
-            source={require("../../assets/images/menuIcon.png")}
-            style={styles.headerMenuImage}
-            resizeMode="contain"
-          />
-        </Pressable>
-      </View>
+      <Header onMenuPress={handleMenuPress} />
       <ScrollView style={styles.homeContent}>
+        <SideBar pressedMenuButton={menuState} />
         <Slot />
       </ScrollView>
       <View style={[styles.footer, { paddingBottom: insets.bottom }]}>
-        <Pressable style={styles.footerButtonContainer} onPress={() => {
-          router.push("/")
-        }}>
+        <Pressable
+          style={styles.footerButtonContainer}
+          onPress={() => {
+            router.push("/");
+          }}
+        >
           <Image
             source={require("../../assets/images/pokedexIcon.png")}
             style={styles.footerButtonImage}
             resizeMode="contain"
           />
         </Pressable>
-        <Pressable style={styles.footerButtonContainer} onPress={() => {
-          router.push("/chatBot" as any);
-        }}>
+        <Pressable
+          style={styles.footerButtonContainer}
+          onPress={() => {
+            router.push("/chatBot" as any);
+          }}
+        >
           <Image
             source={require("../../assets/images/premierball.png")}
             style={styles.footerButtonImage}
             resizeMode="contain"
           />
         </Pressable>
-        <Pressable style={styles.footerButtonContainer} onPress={() => {
-          router.push("/chatGlobal" as any);
-        }}>
+        <Pressable
+          style={styles.footerButtonContainer}
+          onPress={() => {
+            router.push("/chatGlobal" as any);
+          }}
+        >
           <Image
             source={require("../../assets/images/chatDefault.png")}
             style={styles.footerButtonImage}
