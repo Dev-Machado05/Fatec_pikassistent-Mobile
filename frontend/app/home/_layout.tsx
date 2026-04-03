@@ -1,20 +1,16 @@
-import {
-  Image,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-import React, { useState } from "react";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { router, Slot } from "expo-router";
+import FastAccess from "@/assets/globalComponents/FooterFastAccess/FastAccess";
 import Header from "@/assets/globalComponents/Header/Header";
 import SideBar from "@/assets/globalComponents/sideBar/sideBar";
+import { Slot } from "expo-router";
+import React, { useState } from "react";
+import {
+  ScrollView,
+  StyleSheet,
+  View
+} from "react-native";
 
 export default function _layout() {
   const [menuState, setMenuState] = useState<boolean>(false);
-  const insets = useSafeAreaInsets();
   const handleMenuPress = () => {
     setMenuState(!menuState);
   };
@@ -23,47 +19,10 @@ export default function _layout() {
     <View style={styles.homeContainer}>
       <Header onMenuPress={handleMenuPress} />
       <ScrollView style={styles.homeContent}>
-        <SideBar pressedMenuButton={menuState} />
+        <SideBar isVisible={menuState} />
         <Slot />
       </ScrollView>
-      <View style={[styles.footer, { paddingBottom: insets.bottom }]}>
-        <Pressable
-          style={styles.footerButtonContainer}
-          onPress={() => {
-            router.push("/");
-          }}
-        >
-          <Image
-            source={require("../../assets/images/pokedexIcon.png")}
-            style={styles.footerButtonImage}
-            resizeMode="contain"
-          />
-        </Pressable>
-        <Pressable
-          style={styles.footerButtonContainer}
-          onPress={() => {
-            router.push("/chatBot" as any);
-          }}
-        >
-          <Image
-            source={require("../../assets/images/premierball.png")}
-            style={styles.footerButtonImage}
-            resizeMode="contain"
-          />
-        </Pressable>
-        <Pressable
-          style={styles.footerButtonContainer}
-          onPress={() => {
-            router.push("/chatGlobal" as any);
-          }}
-        >
-          <Image
-            source={require("../../assets/images/chatDefault.png")}
-            style={styles.footerButtonImage}
-            resizeMode="contain"
-          />
-        </Pressable>
-      </View>
+      <FastAccess />
     </View>
   );
 }
@@ -100,21 +59,4 @@ const styles = StyleSheet.create({
     borderRadius: 50,
   },
   homeContent: {},
-  footer: {
-    height: "auto",
-    width: "100%",
-    padding: 10,
-    flexDirection: "row",
-    backgroundColor: "#2C2A3E",
-    alignItems: "center",
-    justifyContent: "space-around",
-  },
-  footerButtonContainer: {
-    height: "auto",
-    width: "auto",
-  },
-  footerButtonImage: {
-    height: 60,
-    width: 60,
-  },
 });

@@ -21,7 +21,7 @@ export default function getSideMenuItems() {
     {
         name: "Pokedex",
         Icon: require("../images/pokedexIcon.png"),
-        link: "/pokedex" 
+        link: "/Pokedex" 
     },
   ];
 

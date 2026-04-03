@@ -4,15 +4,15 @@ import getSideMenuItems from "@/assets/hooks/getSideMenuItems";
 import { router } from "expo-router";
 
 export default function SideBar({
-  pressedMenuButton,
+  isVisible,
 }: {
-  pressedMenuButton: boolean;
+  isVisible: boolean;
 }) {
   return (
     <View
       style={[
         styles.sideBarContainer,
-        { display: pressedMenuButton ? "flex" : "none" },
+        { display: isVisible ? "flex" : "none" },
       ]}
     >
       {getSideMenuItems().map((item, index) => (

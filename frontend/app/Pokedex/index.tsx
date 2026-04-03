@@ -1,57 +1,98 @@
+import { FontAwesome } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
-import { TextInput, StyleSheet, Text, View, Image } from "react-native";
-import { FontAwesome } from '@expo/vector-icons';
-import { Link } from "expo-router";
+import {
+  Image,
+  ImageBackground,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
+import PokemonList from "./components/PokemonList";
 
 export default function Pokedex() {
   const [pokemon, setPokemon] = useState<any>(null);
-  const pokemonId = 1; // Example: Bulbasaur
+  const [selectedPokemonID, setSelectedPokemonID] = useState<string>("1");
+  const [pokemonImageSize, setPokemonImageSize] = useState({
+    width: 96,
+    height: 96,
+  });
 
   useEffect(() => {
-    fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonId}`)
+    fetch(`https://pokeapi.co/api/v2/pokemon/${selectedPokemonID}`)
       .then((res) => res.json())
       .then((data) => setPokemon(data));
-  }, []);
+  }, [selectedPokemonID]);
+
+  const changeSelectedPokemon = (id: string) => {
+    console.log(id);
+    setSelectedPokemonID(id);
+  };
+
+  // image sprites options
+  const pokemonImageUri =
+    pokemon?.sprites?.other?.["official-artwork"]?.front_default ||
+    pokemon?.sprites?.other?.showdown?.front_default ||
+    pokemon?.sprites?.front_default;
 
   return (
-    <View style={styles.container}>
-      <Text>Pokedex</Text>
+    <ImageBackground
+      source={require("../../assets/images/Bg2.png")}
+      style={styles.container}
+    >
+      <Text style={styles.pokedexTitle}>Pokedex</Text>
       <View style={styles.topPokedexContainer}>
         <View style={styles.pokemonInfo}>
           <View style={styles.pokemonInfoRow}>
             <Text style={styles.pokemonTopText}>#{pokemon?.id ?? "-"}</Text>
-            <Text style={styles.pokemonTopText}>{pokemon?.name ?? "Loading..."}</Text>
-          </View>  
+            <Text style={styles.pokemonTopText}>
+              {pokemon?.name ?? "Loading..."}
+            </Text>
+          </View>
           {pokemon?.sprites?.front_default && (
             <View style={styles.pokemonImageContainer}>
               <Image
-                source={{ uri: pokemon.sprites.front_default }}
-                style={styles.pokemonImage}
+                source={{ uri: pokemonImageUri }}
+                style={[
+                  styles.pokemonImage,
+                  {
+                    width: pokemonImageSize.width,
+                    height: pokemonImageSize.height,
+                  },
+                ]}
                 resizeMode="contain"
+                onLoad={(event) => {
+                  const { width, height } = event.nativeEvent.source;
+                  if (!width || !height) return;
+
+                  const maxSize = 120;
+                  const scale = Math.min(maxSize / width, maxSize / height);
+
+                  setPokemonImageSize({
+                    width: Math.round(width * scale),
+                    height: Math.round(height * scale),
+                  });
+                }}
               />
             </View>
           )}
-        <Text style={styles.pokedexTopText}>Clique aqui para ver mais</Text>
+          <Text style={styles.pokedexTopText}>Clique aqui para ver mais</Text>
         </View>
       </View>
 
-      <View style={styles.pokemonSearchContainer}>
-        <FontAwesome name="search" size={20} color="#e7775e" />
-        <TextInput
-          style={styles.pokedexSearchInput}
-          placeholder="Procurar..."
-          placeholderTextColor="#e7775e"
-        />
+      {/* TODO: add a function to search a specific pokemon */}
+      <View style={styles.pokemonListContainer}>
+        <View style={styles.pokemonSearchContainer}>
+          <FontAwesome name="search" size={20} color="#e7775e" />
+          <TextInput
+            style={styles.pokedexSearchInput}
+            placeholder="Procurar..."
+            placeholderTextColor="#e7775e"
+          />
+        </View>
+        <PokemonList onSelect={(id) => changeSelectedPokemon(id)} />
       </View>
-
-      <View style={styles.botPokedexContainer}>
-        <Link style={styles.pokemonBotText} href="/Pokedex/1">Go to Pokemon 1</Link>
-        <Link style={styles.pokemonBotText} href="/Pokedex/2">Go to Pokemon 2</Link>
-        <Link style={styles.pokemonBotText} href="/Pokedex/3">Go to Pokemon 3</Link>
-      </View>
-    </View>
-    // TODO:
-    // Puxar IDs do pokeapi.co e gerar links dinamicamente
+    </ImageBackground>
   );
 }
 
@@ -62,16 +103,27 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 20,
+    padding: 20,
   },
+  pokedexTitle: {
+    fontSize: 27,
+    fontWeight: "800",
+    fontFamily: "serif",
+  },
+
+  // pokemon selecionado
+
   topPokedexContainer: {
     flex: 1,
-    backgroundColor: "#1C242F",
+    backgroundColor: "#1c242f5b",
     alignItems: "center",
     justifyContent: "center",
     gap: 20,
-    width: 320,
+    width: "100%",
+    // maxHeight: "30%",
     borderRadius: 16,
-    padding: 16,
+    paddingVertical: 18,
+    paddingHorizontal: 21,
   },
   pokemonInfo: {
     alignItems: "center",
@@ -102,7 +154,7 @@ const styles = StyleSheet.create({
     padding: 8,
     width: "100%",
     alignItems: "center",
-    marginBottom: 8,
+    // marginBottom: 8,
   },
   pokemonImage: {
     width: 96,
@@ -113,20 +165,32 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: "center",
   },
+
+  ///
+  // pokemon List container
+
+  pokemonListContainer: {
+    maxHeight: "50%",
+    marginHorizontal: 15,
+  },
+
+  // pokemon search bar
+
   pokemonSearchContainer: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
     backgroundColor: "#1C242F",
-    borderRadius: 12,
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
     padding: 12,
-    width: 320,
-    
+    width: "100%",
   },
   pokedexSearchInput: {
     color: "white",
     fontSize: 16,
     opacity: 0.5,
+    flex: 1,
   },
   botPokedexContainer: {
     flex: 1,
@@ -135,7 +199,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 20,
     width: 320,
-    borderRadius: 16,
+    borderBottomLeftRadius: 16,
+    borderBottomRightRadius: 16,
     padding: 16,
   },
   pokemonBotText: {

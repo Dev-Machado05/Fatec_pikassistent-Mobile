@@ -1,9 +1,8 @@
-import { ScrollView, StyleSheet, View, Alert, Image, Text } from "react-native";
-import React, { useState } from "react";
-import { Slot } from "expo-router";
 import Header from "@/assets/globalComponents/Header/Header";
-import Footer from "@/assets/globalComponents/FooterInput/FooterInput";
 import SideBar from "@/assets/globalComponents/sideBar/sideBar";
+import { Slot } from "expo-router";
+import React, { useState } from "react";
+import { ScrollView, StyleSheet, View } from "react-native";
 
 export default function _layout() {
   const [pressedMenuButton, setPressedMenuButton] = useState<boolean>(false);
@@ -20,7 +19,7 @@ export default function _layout() {
         style={styles.chatBotContent}
         contentContainerStyle={styles.chatBotContentContainer}
       >
-        <SideBar pressedMenuButton={pressedMenuButton} />
+        <SideBar isVisible={pressedMenuButton} />
         <Slot />
       </ScrollView>
     </View>
