@@ -55,14 +55,18 @@ app.get("/api/getMessage", (req, res) => {
 app.post("/api/postMessage", (req, res) => {
   try {
     const {id, message, senderName} = req.body;
-    if(!id || !message || !senderName) {
+
+    if(!message || !senderName) {
       return res.status(400).json({
         success: false,
-        error: "id ou mensagem faltando."
+        error: "Mensagem ou nome do remetente faltando."
       });
     }
 
-    messages.push({ id, text: message, senderName });
+    const userId = id || `anon_${Date.now()}`
+
+    messages.push({ id: userId, text: message, senderName: senderName || "Anônimo" });
+
     res.status(200).json({success:true});
   }
   catch(error) {

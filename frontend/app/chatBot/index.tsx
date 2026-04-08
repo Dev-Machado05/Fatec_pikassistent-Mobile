@@ -1,25 +1,19 @@
+import Constants from 'expo-constants';
 import { useState } from "react";
 import {
   Image,
   ImageBackground,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
   TextInput, TouchableOpacity,
-  View,
-  Platform
+  View
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Constants from 'expo-constants';
 
 
 const getApiUrl = () => {
-  if (Platform.OS === 'android' && !Constants.isDevice) {
-    return 'http://10.0.2.2:7070';
-  }
-  if ((Platform.OS === 'ios' && !Constants.isDevice) || Platform.OS === 'web') {
-    return 'http://localhost:7070';
-  }
   return process.env.EXPO_PUBLIC_API_URL || 'http://localhost:7070';
 };
 
@@ -30,18 +24,28 @@ export default function index() {
   const insets = useSafeAreaInsets();
   const [messages, setMessages] = useState<any[]>([]);
   const [inputText, setInputText] = useState("");
+
+  const generateId = () => {
+    return Date.now().toString() + Math.random().toString(36).substr(2, 9);
+  };
+
   function sendMessage() {
     if (!inputText.trim()) return;
+
+      console.log('1️⃣ Mensagem enviada:', inputText);
+      console.log('2️⃣ API_URL:', API_URL);
 
     const newMessage = {
       message: inputText,
       sender: "user",
-      id: crypto.randomUUID(),
+      id: generateId(),
     };
 
     const updatedMessages = [...messages, newMessage];
     setMessages(updatedMessages);
     setInputText("");
+
+    console.log('3️⃣ Fazendo fetch para:', `${API_URL}/api/chat`);
 
     fetch(`${API_URL}/api/chat`, {
       method: "POST",
@@ -51,28 +55,31 @@ export default function index() {
       body: JSON.stringify({ message: inputText }),
     })
       .then((res) => {
+        console.log('4️⃣ Resposta recebida, status:', res.status);
         if (!res.ok) {
           throw new Error("HTTP error " + res.status);
         }
         return res.json();
       })
       .then((data) => {
+        console.log('5️⃣ Data recebida:', data);
         setMessages((prev) => [
           ...prev,
           {
             message: data.response || "Erro na resposta",
             sender: "bot",
-            id: crypto.randomUUID(),
+            id: generateId(),
           },
         ]);
       })
-      .catch(() => {
+      .catch((err) => {
+        console.log('6️⃣ Erro:', err);
         setMessages((prev) => [
           ...prev,
           {
             message: "Erro ao conectar com servidor",
             sender: "bot",
-            id: crypto.randomUUID(),
+            id: generateId(),
           },
         ]);
       });
