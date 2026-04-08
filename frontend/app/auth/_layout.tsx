@@ -1,14 +1,24 @@
-import { Slot } from "expo-router";
+import { Slot, useSegments } from "expo-router";
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-export default function _layout() {
+const titleByRoute: Record<string, string> = {
+  login: "Login",
+  signUp: "Cadastro",
+  forgotPassword: "Recuperar Senha",
+};
+
+export default function AuthLayout() {
   const insets = useSafeAreaInsets();
+  const segments = useSegments();
+  const routeName = segments[segments.length - 1];
+  const title = titleByRoute[routeName] || "Autenticacao";
+
   return (
     <View style={styles.container}>
       <View style={[styles.header, {paddingTop: insets.top}]}>
-        <Text>Weyy</Text>
+        <Text style={styles.headerTitle}>{title}</Text>
       </View>
       <View style={styles.content}>
         <Slot />
@@ -25,6 +35,12 @@ const styles = StyleSheet.create({
     flex: 1,
     width: "100%",
     backgroundColor: "#000",
+  },
+  headerTitle: {
+    color: "#000000",
+    fontSize: 20,
+    fontWeight: "500",
+    fontFamily: "Open Sans"
   },
   content: {
     flex: 1,

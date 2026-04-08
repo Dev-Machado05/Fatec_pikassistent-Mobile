@@ -1,4 +1,4 @@
-import { Image, StyleSheet, Text, View } from 'react-native'
+import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import Animated, {
   cancelAnimation,
   Easing,
@@ -7,8 +7,8 @@ import Animated, {
   withRepeat,
   withTiming,
 } from "react-native-reanimated";
-import React, { useEffect, useMemo, useState } from 'react'
-
+import React, { useEffect, useMemo, useState } from "react";
+import { Link, useRouter } from "expo-router";
 
 const CARD_WIDTH = 132;
 const CARD_GAP = 15;
@@ -30,6 +30,7 @@ type PokemonListResponse = {
 };
 
 export default function PokedexCarroussel() {
+  const router = useRouter();
   const [pokemon, setPokemon] = useState<PokemonItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
@@ -53,16 +54,18 @@ export default function PokedexCarroussel() {
               throw new Error(`Falha ao buscar detalhes: ${res2.status}`);
             }
             return (await res2.json()) as PokemonItem;
-          })
+          }),
         );
         if (isMounted) {
           setPokemon(details);
           setFetchError(null);
         }
-      } catch(error) {
-        console.error("Erro ao buscar o Pokemon:", error)
+      } catch (error) {
+        console.error("Erro ao buscar o Pokemon:", error);
         if (isMounted) {
-          setFetchError("Ocorreu um erro ao buscar o pokemon, tente novamente mais tarde...");
+          setFetchError(
+            "Ocorreu um erro ao buscar o pokemon, tente novamente mais tarde...",
+          );
         }
       } finally {
         if (isMounted) {
@@ -90,7 +93,7 @@ export default function PokedexCarroussel() {
         easing: Easing.linear,
       }),
       -1,
-      false
+      false,
     );
 
     return () => {
@@ -100,9 +103,9 @@ export default function PokedexCarroussel() {
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
-      transform: [{translateX: translateX.value}]
-    }
-  })
+      transform: [{ translateX: translateX.value }],
+    };
+  });
 
   const repeated = useMemo(() => [...pokemon, ...pokemon], [pokemon]);
 
@@ -122,7 +125,14 @@ export default function PokedexCarroussel() {
     return repeated.map((p, i) => {
       const imageUri = p.sprites.other["official-artwork"].front_default;
       return (
-        <View key={`${p.id}-${i}`} style={styles.card}>
+        <Pressable
+          key={`${p.id}-${i}`}
+          style={styles.card}
+          onPress={() => {
+            console.log(`id pokemon selecionado ${p.id}`);
+            router.push("/Pokedex" as any);
+          }}
+        >
           {imageUri ? (
             <Image
               source={{ uri: imageUri }}
@@ -135,7 +145,7 @@ export default function PokedexCarroussel() {
             </View>
           )}
           <Text style={styles.name}>{p.name}</Text>
-        </View>
+        </Pressable>
       );
     });
   };
@@ -148,7 +158,7 @@ export default function PokedexCarroussel() {
         </Animated.View>
       </View>
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -194,4 +204,4 @@ const styles = StyleSheet.create({
     color: "#1f2d3d",
     paddingHorizontal: 16,
   },
-})
+});

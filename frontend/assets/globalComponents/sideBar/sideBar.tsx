@@ -1,6 +1,6 @@
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import React from "react";
-import getSideMenuItems from "@/assets/hooks/getSideMenuItems";
+import getSideMenuItems from "@/assets/helper/getSideMenuItems";
 import { router } from "expo-router";
 
 export default function SideBar({

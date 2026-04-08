@@ -1,4 +1,4 @@
-import getScreenSize from "@/assets/hooks/getScreenSize";
+import getScreenSize from "@/assets/helper/getScreenSize";
 import { Link } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
