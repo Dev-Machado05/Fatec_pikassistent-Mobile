@@ -1,5 +1,6 @@
+import { submitSignUp } from "@/assets/services/authServices";
 import { Picker } from "@react-native-picker/picker";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   ImageBackground,
@@ -10,12 +11,14 @@ import {
   View,
 } from "react-native";
 
-export default function signUp() {
+export default function SignUp() {
+  const router = useRouter();
   const [email, setEmail] = useState<string>("");
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [confPassword, setConfPassword] = useState<string>("");
   const [team, setTeam] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   function validateSignUp() {
     // Validate email format
@@ -60,12 +63,62 @@ export default function signUp() {
       return false;
     }
 
-    console.log("a Validação foi um sucesso");
     // Se chegou até aqui, tudo está válido
-    // chamar função de cadastro
-    // handleSignUp(email, username, password, team, idNumber)
 
     return true;
+  }
+
+  async function handleSignUp() {
+    if (!validateSignUp() || isSubmitting) {
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+
+      await submitSignUp({
+        email: email.trim(),
+        password,
+        username: username.trim(),
+        team,
+      });
+
+      alert("Cadastro concluido. Sua conta foi criada com sucesso.");
+      router.replace("/home");
+    } catch (error: any) {
+      const code = error?.code as string | undefined;
+      const originalCode = error?.originalCode as string | undefined;
+
+      console.error("signUp error", {
+        code,
+        originalCode,
+        message: error?.message,
+      });
+
+      if (code === "auth/email-already-in-use") {
+        alert("Email em uso. Este email ja esta cadastrado.");
+      } else if (code === "auth/invalid-email") {
+        alert("Email invalido. Informe um email valido.");
+      } else if (code === "auth/weak-password") {
+        alert("Senha fraca. A senha deve ter pelo menos 6 caracteres.");
+      } else if (code === "profile/persist-failed") {
+        if (originalCode === "permission-denied") {
+          alert(
+            "Conta criada, mas falhou ao salvar perfil. Verifique as regras do Firestore (permissao negada).\n\nCodigo: permission-denied",
+          );
+        } else {
+          alert(
+            `Conta criada, mas falhou ao salvar perfil no banco.\n\nCodigo: ${originalCode || "desconhecido"}`,
+          );
+        }
+      } else {
+        alert(
+          `Falha no cadastro. Nao foi possivel criar a conta agora.\n\nCodigo: ${code || "desconhecido"}`,
+        );
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -78,18 +131,24 @@ export default function signUp() {
       >
         {/* form  */}
         <View style={styles.signUpFormContainer}>
-          <Text style={styles.signUpFormTitle}>signUp</Text>
           <View style={styles.signUpFormContent}>
             {/* input section */}
             <View style={styles.signUpInputContainer}>
               <Text style={styles.signUpInputLabel}>Email:</Text>
-              <TextInput style={styles.signUpInput} onChangeText={setEmail} />
+              <TextInput
+                style={styles.signUpInput}
+                onChangeText={setEmail}
+                value={email}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
             </View>
             <View style={styles.signUpInputContainer}>
               <Text style={styles.signUpInputLabel}>Nome de usuário:</Text>
               <TextInput
                 style={styles.signUpInput}
                 onChangeText={setUsername}
+                value={username}
               />
             </View>
             <View style={styles.signUpInputContainer}>
@@ -97,6 +156,8 @@ export default function signUp() {
               <TextInput
                 style={styles.signUpInput}
                 onChangeText={setPassword}
+                value={password}
+                secureTextEntry={true}
               />
             </View>
             <View style={styles.signUpInputContainer}>
@@ -104,27 +165,24 @@ export default function signUp() {
               <TextInput
                 style={styles.signUpInput}
                 onChangeText={setConfPassword}
+                value={confPassword}
+                secureTextEntry={true}
               />
             </View>
             <View style={styles.signUpInputContainer}>
               <Text style={styles.signUpInputLabel}>Time pokemon:</Text>
-              <Picker
-                style={[
-                  styles.signUpInput,
-                  {
-                    borderWidth: 1,
-                    borderColor: "#000000",
-                    backgroundColor: "#ffffff",
-                  },
-                ]}
-                selectedValue={team}
-                onValueChange={(value, index) => setTeam(value as string)}
-              >
-                <Picker.Item label="Selecione um time" value="" />
-                <Picker.Item label="Red" value="Red" />
-                <Picker.Item label="Yellow" value="Yellow" />
-                <Picker.Item label="Blue" value="Blue" />
-              </Picker>
+              <View style={styles.signUpPickerWrapper}>
+                <Picker
+                  style={styles.signUpPicker}
+                  selectedValue={team}
+                  onValueChange={(value, index) => setTeam(value as string)}
+                >
+                  <Picker.Item label="Selecione um time" value="" />
+                  <Picker.Item label="Red - Valor" value="Red" />
+                  <Picker.Item label="Yellow - Instinto" value="Yellow" />
+                  <Picker.Item label="Blue - Místico" value="Blue" />
+                </Picker>
+              </View>
             </View>
             {/* signUp link */}
             <Link href={"/auth/login"} style={styles.gotoLoginLink}>
@@ -135,24 +193,18 @@ export default function signUp() {
           <View style={styles.signUpButtonContainer}>
             <Pressable
               style={styles.signUpButton}
-              onPress={async () => {
-                // const ok = await validateSignUp
-                // if (ok) { /*Go to home page*/}
-                // else {alert("Falha ao fazer o signUp")}
-              }}
-            >
-              <Text style={styles.signUpButtonText}>Cadastrar</Text>
-            </Pressable>
-            <Pressable
-              style={styles.signUpGoogleButton}
-              onPress={() => {
-                // handleGooglesignUp;
-              }}
+              onPress={handleSignUp}
+              disabled={isSubmitting}
             >
               <Text style={styles.signUpButtonText}>
-                Continuar com o Google
+                {isSubmitting ? "Cadastrando..." : "Cadastrar"}
               </Text>
             </Pressable>
+            {/*
+            <Pressable style={styles.signUpGoogleButton}>
+              <Text style={styles.signUpButtonText}>Continuar com o Google</Text>
+            </Pressable>
+            */}
           </View>
         </View>
       </ImageBackground>
@@ -175,23 +227,23 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#ffffff",
-    padding: 25,
+    paddingHorizontal: 25,
+    paddingVertical: 35,
     gap: 30,
     borderRadius: 15,
     borderWidth: 1,
     borderColor: "#000000",
   },
-  signUpFormTitle: {
-    fontFamily: "Gill Sans",
-    fontWeight: 700,
-    fontSize: 28,
-    color: "#000000",
-    textAlign: "center",
+  signUpFormContent: {
+    width: "85%",
+    alignItems: "center",
+    gap: 15,
   },
-  signUpFormContent: { width: "85%", alignItems: "center", gap: 15 },
 
   // input section
-  signUpInputContainer: { width: "100%" },
+  signUpInputContainer: {
+    width: "100%",
+  },
   signUpInputLabel: {
     color: "#000000",
     fontSize: 16,
@@ -206,9 +258,23 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#000000",
   },
+  signUpPickerWrapper: {
+    width: "100%",
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: "#000000",
+    backgroundColor: "#ffffff",
+    overflow: "hidden",
+  },
+  signUpPicker: {
+    width: "100%",
+  },
 
   // signUp link
-  gotoLoginLink: { color: "blue", textDecorationLine: "underline" },
+  gotoLoginLink: {
+    color: "blue",
+    textDecorationLine: "underline",
+  },
 
   // buttons section
   signUpButtonContainer: {

@@ -31,8 +31,9 @@ yarn-error.*
 *.pem
 
 # local env files
-.env*.local
 .env
+.env.*
+!.env.example
 
 # typescript
 *.tsbuildinfo
@@ -45,5 +46,6 @@ app-example
 
 .vscode/
 
-/package-lock.json
-frontend/.gitignore
+# keys
+backend/pikassistent-firebase-adminsdk-fbsvc-97b3d104e5.json
+backend/*firebase-adminsdk*.json

@@ -18,7 +18,7 @@ export default function index() {
     async function verifyConnection() {
       try {
         let token = await AsyncStorage.getItem("userToken");
-        let val = true; // validar tokem no back via api
+        let val = false; // validar tokem no back via api
 
         if (!token) {
           setTargetPage("/landingPage");

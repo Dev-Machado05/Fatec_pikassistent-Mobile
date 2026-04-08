@@ -65,7 +65,7 @@ export default function Pokedex() {
                   const { width, height } = event.nativeEvent.source;
                   if (!width || !height) return;
 
-                  const maxSize = 120;
+                  const maxSize = 90;
                   const scale = Math.min(maxSize / width, maxSize / height);
 
                   setPokemonImageSize({
@@ -102,11 +102,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
-    gap: 20,
+    gap: 10,
     padding: 20,
   },
   pokedexTitle: {
-    fontSize: 27,
+    fontSize: 23,
     fontWeight: "800",
     fontFamily: "serif",
   },
@@ -120,7 +120,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 20,
     width: "100%",
-    // maxHeight: "30%",
     borderRadius: 16,
     paddingVertical: 18,
     paddingHorizontal: 21,
@@ -129,6 +128,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 12,
     backgroundColor: "#0F102C",
+    height: "100%",
     borderRadius: 12,
     borderWidth: 4,
     borderColor: "#e7775e",
@@ -154,7 +154,6 @@ const styles = StyleSheet.create({
     padding: 8,
     width: "100%",
     alignItems: "center",
-    // marginBottom: 8,
   },
   pokemonImage: {
     width: 96,

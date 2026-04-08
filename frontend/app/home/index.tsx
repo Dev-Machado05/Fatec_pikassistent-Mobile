@@ -1,4 +1,4 @@
-import getScreenSize from "@/assets/hooks/getScreenSize";
+import getScreenSize from "@/assets/helper/getScreenSize";
 import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NavigationProp, useNavigation } from "@react-navigation/native";

@@ -1,8 +1,10 @@
 const cors = require('cors');
 const express = require('express');
+const auth = require('./auth/authMiddleware')
 const app = express();
 const PORT = 7070;
 
+// Infra da API: configuracao de CORS e preflight.
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -13,6 +15,8 @@ app.use((req, res, next) => {
   }
   next();
 });
+
+// Infra da API: habilita leitura de JSON no corpo das requisicoes.
 app.use(express.json());
 
 const Groq = require('groq-sdk');
@@ -30,14 +34,24 @@ let messages = [
   }
 ]
 
+// authenticação:
 
+app.get("/profile", auth, (req, res) => {
+  res.json({
+    message: "Usuário autenticado",
+    uid: req.user.uid,
+    email: req.user.email,
+  } );
+});
+
+// ---
+
+// chat global (memoria local): lista mensagens salvas.
 app.get("/api/getMessage", (req, res) => {
   res.status(200).json({success: true, data: messages});
 });
 
-
-
-
+// chat global (memoria local): salva mensagem enviada.
 app.post("/api/postMessage", (req, res) => {
   try {
     const {id, message, senderName} = req.body;
@@ -56,6 +70,9 @@ app.post("/api/postMessage", (req, res) => {
   }
 });
 
+// -----
+
+// Chatbot IA: recebe mensagem do usuario e gera resposta com Groq.
 app.post("/api/chat", async (req, res) => {
   try {
     console.log("🔍 HEADERS:", req.headers);
@@ -75,6 +92,7 @@ app.post("/api/chat", async (req, res) => {
       });
     }
 
+    // Chamada ao modelo de IA com persona do Pikassistent.
     const completion = await groq.chat.completions.create({
       messages: [
         {
@@ -106,6 +124,7 @@ app.post("/api/chat", async (req, res) => {
 }); 
 
 
+// Infra do servidor: inicializa a aplicacao na porta definida.
 app.listen(PORT, () => {
   console.log(`🚀 App listening on the port: http://localhost:${PORT} `);
   console.log('📊 Database connected')
