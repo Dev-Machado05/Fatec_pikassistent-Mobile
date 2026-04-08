@@ -1,5 +1,6 @@
 import Footer from "@/assets/globalComponents/FooterInput/FooterInput";
-import React, { useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, { useEffect, useState } from "react";
 import {
   Image,
   ImageBackground,
@@ -11,24 +12,84 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function index() {
-  const [userID, setUserID] = useState<String>("001");
+  const [userID, setUserID] = useState<string>("");
+  const [userName, setUserName] = useState<string>("");
+  const [messages, setMessages] = useState<any[]>([]);
   const insets = useSafeAreaInsets();
-  const messages = [
-    {
-      message: "random example text",
-      senderID: "001",
-      senderName: "user",
-    },
-    {
-      message: "chat answer",
-      senderID: "002",
-      senderName: "bot",
-    },
-  ];
 
-  function sendMessage(text: String) {
+  useEffect(() => {
+    loadOrCreateUserSession();
+  }, []);
+
+  useEffect(() => {    if (userID) {
+      loadMessages();
+    }
+  }, [userID]); 
+
+  async function loadOrCreateUserSession() {
+    try {
+      let storedId = await AsyncStorage.getItem('userID');
+      let storedName = await AsyncStorage.getItem('userName');
+
+      if (!storedId) {
+        storedId = `anon_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        storedName = `Visitor_${Math.floor(Math.random() * 1000)}`;
+
+        await AsyncStorage.setItem('userID', storedId);
+        await AsyncStorage.setItem('userName', storedName);
+      }
+
+      setUserID(storedId);
+      setUserName(storedName || 'visitante');
+    } catch (error) {
+      console.error('Erro criando ou carregando sessão anônima:', error);
+
+      setUserID('temp_${date.now()}');
+      setUserName('visitante');
+    } 
+  }
+
+  async function sendMessage(text: string) {
     console.log("teste de função!!! " + text);
-    // TODO: implement the submit function here
+    if (!text.trim()) return; // Evita enviar mensagens vazias
+
+    try {
+      const response = await fetch('http://localhost:7070/api/postMessage', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: userID,
+          message: text,
+          senderName: userName
+        }),
+      });
+
+      if (response.ok) {
+        await loadMessages(); // Recarrega as mensagens após enviar
+      }
+    } catch (error) {
+      console.error('Erro enviando mensagem:', error);
+    }
+  }
+
+  async function loadMessages() {
+    try {
+      const response = await fetch('http://localhost:7070/api/getMessage');
+      const result = await response.json();
+      if (response.ok && result.success) {
+         const formattedMessages = result.data.map((msg: any) => ({
+        message: msg.text,
+        senderID: msg.id,
+        senderName: msg.senderName
+      }));
+      setMessages(formattedMessages);
+      console.log('Mensagens carregadas:', formattedMessages);
+      }
+    } catch (error) {      
+      console.error('Erro carregando mensagens:', error);
+    }
   }
 
   return (
