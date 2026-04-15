@@ -10,6 +10,12 @@ import {
   TextInput,
   View,
 } from "react-native";
+import AlertPopUp from "./helper/AlertPopUp";
+
+type popUpDataType = {
+  content: string;
+  messageType: "error" | "success";
+};
 
 export default function SignUp() {
   const router = useRouter();
@@ -19,6 +25,8 @@ export default function SignUp() {
   const [confPassword, setConfPassword] = useState<string>("");
   const [team, setTeam] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [popUpData, setPopUpData] = useState<popUpDataType>();
+  const [showPopUp, setShowPopUp] = useState<boolean>(false);
 
   function validateSignUp() {
     // Validate email format
@@ -44,22 +52,38 @@ export default function SignUp() {
 
     // Main validation function
     if (!allFieldsFilled()) {
-      alert("Todos os campos são obrigatórios.");
+      setPopUpData({
+        content: "Todos os campos são obrigatórios.",
+        messageType: "error",
+      });
+      setShowPopUp(true);
       return false;
     }
 
     if (!isValidEmail(email)) {
-      alert("Por favor, insira um email válido.");
+      setPopUpData({
+        content: "Por favor, insira um email válido.",
+        messageType: "error",
+      });
+      setShowPopUp(true);
       return false;
     }
 
     if (!isValidPassword(password)) {
-      alert("A senha deve ter pelo menos 6 caracteres.");
+      setPopUpData({
+        content: "A senha deve ter pelo menos 6 caracteres.",
+        messageType: "error",
+      });
+      setShowPopUp(true);
       return false;
     }
 
     if (!passwordsMatch()) {
-      alert("As senhas não coincidem.");
+      setPopUpData({
+        content: "As senhas não coincidem.",
+        messageType: "error",
+      });
+      setShowPopUp(true);
       return false;
     }
 
@@ -83,8 +107,11 @@ export default function SignUp() {
         team,
       });
 
-      alert("Cadastro concluido. Sua conta foi criada com sucesso.");
-      router.replace("/home");
+      setPopUpData({
+        content: "Cadastro concluido. Sua conta foi criada com sucesso.",
+        messageType: "success",
+      });
+      setShowPopUp(true);
     } catch (error: any) {
       const code = error?.code as string | undefined;
       const originalCode = error?.originalCode as string | undefined;
@@ -96,26 +123,50 @@ export default function SignUp() {
       });
 
       if (code === "auth/email-already-in-use") {
-        alert("Email em uso. Este email ja esta cadastrado.");
+        setPopUpData({
+          content: "Email em uso. Este email ja esta cadastrado.",
+          messageType: "error",
+        });
       } else if (code === "auth/invalid-email") {
-        alert("Email invalido. Informe um email valido.");
+        setPopUpData({
+          content: "Email invalido. Informe um email valido.",
+          messageType: "error",
+        });
       } else if (code === "auth/weak-password") {
-        alert("Senha fraca. A senha deve ter pelo menos 6 caracteres.");
+        setPopUpData({
+          content: "Senha fraca. A senha deve ter pelo menos 6 caracteres.",
+          messageType: "error",
+        });
       } else if (code === "profile/persist-failed") {
         if (originalCode === "permission-denied") {
-          alert(
-            "Conta criada, mas falhou ao salvar perfil. Verifique as regras do Firestore (permissao negada).\n\nCodigo: permission-denied",
+          console.error(
+            "Conta criada, mas falhou ao salvar perfil. Verifique as regras do Firestore (permissao negada).",
           );
+          setPopUpData({
+            content:
+              "Conta criada, mas ocorreu um erro ao efetuar o login, tente efetuar o login manualmente.",
+            messageType: "error",
+          });
         } else {
-          alert(
+          console.error(
             `Conta criada, mas falhou ao salvar perfil no banco.\n\nCodigo: ${originalCode || "desconhecido"}`,
           );
+          setPopUpData({
+            content:
+              "Conta criada, mas ocorreu um erro ao efetuar o login, tente efetuar o login manualmente.",
+            messageType: "error",
+          });
         }
       } else {
-        alert(
+        console.error(
           `Falha no cadastro. Nao foi possivel criar a conta agora.\n\nCodigo: ${code || "desconhecido"}`,
         );
+        setPopUpData({
+          content: "Falha no cadastro. Não foi possivel criar a conta agora, tente novamente mais tarte...",
+          messageType: "error",
+        })
       }
+      setShowPopUp(true);
     } finally {
       setIsSubmitting(false);
     }
@@ -123,6 +174,13 @@ export default function SignUp() {
 
   return (
     <View>
+      <AlertPopUp
+        alertData={popUpData}
+        showAlert={showPopUp}
+        onButtonClick={() => {
+          setShowPopUp(false);
+        }}
+      />
       {/* backgrount Image */}
       <ImageBackground
         source={require("../../assets/images/Bg1.png")}
