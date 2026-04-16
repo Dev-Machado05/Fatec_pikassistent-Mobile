@@ -8,6 +8,7 @@ import {
   Text,
   View,
 } from "react-native";
+import { useRouter } from "expo-router";
 
 type Pokemon = {
   id: string;
@@ -15,11 +16,8 @@ type Pokemon = {
   image: string;
 };
 
-export default function PokemonList({
-  onSelect,
-}: {
-  onSelect: (pokemonId: string) => void;
-}) {
+export default function PokemonList() {
+  const router = useRouter();
   const [pokemons, setPokemons] = useState<Pokemon[]>([]);
   const [nextUrl, setNextUrl] = useState<string | null>(
     "https://pokeapi.co/api/v2/pokemon?limit=20",
@@ -72,7 +70,7 @@ export default function PokemonList({
           ]}
           onPressIn={() => setHoveredItemId(item.id)}
           onPressOut={() => setHoveredItemId(null)}
-          onPress={() => onSelect(item.id)}
+          onPress={() => router.push(`/Pokedex/${item.id}` as any)}
         >
           <Image source={{ uri: item.image }} style={styles.pokemonImage} />
           <Text style={styles.pokemonId}>

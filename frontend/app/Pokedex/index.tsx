@@ -90,7 +90,7 @@ export default function Pokedex() {
             placeholderTextColor="#e7775e"
           />
         </View>
-        <PokemonList onSelect={(id) => changeSelectedPokemon(id)} />
+        <PokemonList />
       </View>
     </ImageBackground>
   );
