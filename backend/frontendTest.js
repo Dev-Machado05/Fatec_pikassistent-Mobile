@@ -2,7 +2,7 @@
 
 async function userMessage() {
     try {
-      const resp = await fetch("https://localhost:7070/api/userMsg", {
+      const resp = await fetch("http://localhost:7070/api/postMessage", {
         method: "POST",
         mode: "cors",
         headers: {

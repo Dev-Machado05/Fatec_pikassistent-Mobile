@@ -9,12 +9,20 @@ import {
   TextInput,
   View,
 } from "react-native";
+import AlertPopUp from "./helper/AlertPopUp";
+
+type popUpDataType = {
+  content: string;
+  messageType: "error" | "success";
+};
 
 export default function Login() {
   const router = useRouter();
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [isLoggingIn, setIsLoggingIn] = useState<boolean>(false);
+  const [popUpData, setPopUpData] = useState<popUpDataType>();
+  const [showPopUp, setShowPopUp] = useState<boolean>(false);
 
   function validateLogin() {
     // Main validation function
@@ -23,35 +31,32 @@ export default function Login() {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       return emailRegex.test(email);
     };
-    
-    // password validation Function
-    const isValidPassword = (password: string) => {
-      return password.length >= 6;
-    };
 
     // Check if all fields are filled
     const allFieldsFilled = () => {
       return email && password;
     };
 
-
     if (!allFieldsFilled()) {
-      alert("Todos os campos são obrigatórios.");
-      return false;
-    }
-    
-    if (!isValidEmail(email)) {
-      alert("Por favor, insira um email válido.");
+      setPopUpData({
+        content: "Todos os campos são obrigatórios.",
+        messageType: "error",
+      });
+      setShowPopUp(true);
       return false;
     }
 
-    if (!isValidPassword(password)) {
-      alert("A senha deve ter pelo menos 6 caracteres.");
+    if (!isValidEmail(email)) {
+      setPopUpData({
+        content: "Por favor, insira um email válido.",
+        messageType: "error",
+      });
+      setShowPopUp(true);
       return false;
     }
 
     // se chegar aqui deu tudo certo.
-    return true
+    return true;
   }
 
   async function handleLogin() {
@@ -73,16 +78,32 @@ export default function Login() {
       });
 
       if (code === "auth/invalid-credential") {
-        alert("Email ou senha invalidos.");
+        setPopUpData({
+          content: "Email ou senha invalidos.",
+          messageType: "error",
+        });
       } else if (code === "auth/user-not-found") {
-        alert("Usuario nao encontrado.");
+        setPopUpData({
+          content: "Usuario nao encontrado.",
+          messageType: "error",
+        });
       } else if (code === "auth/wrong-password") {
-        alert("Senha incorreta.");
+        setPopUpData({
+          content: "Senha incorreta.",
+          messageType: "error",
+        });
       } else if (code === "auth/too-many-requests") {
-        alert("Muitas tentativas. Tente novamente em alguns minutos.");
+        setPopUpData({
+          content: "Muitas tentativas. Tente novamente em alguns minutos.",
+          messageType: "error",
+        });
       } else {
-        alert(`Falha no login.\n\nCodigo: ${code || "desconhecido"}`);
+        setPopUpData({
+          content: `Falha no login.\n\nCodigo: ${code || "desconhecido"}`,
+          messageType: "error",
+        });
       }
+      setShowPopUp(true);
     } finally {
       setIsLoggingIn(false);
     }
@@ -90,6 +111,13 @@ export default function Login() {
 
   return (
     <View>
+      <AlertPopUp
+        alertData={popUpData}
+        showAlert={showPopUp}
+        onButtonClick={() => {
+          setShowPopUp(false);
+        }}
+      />
       {/* backgrount Image */}
       <ImageBackground
         source={require("../../assets/images/Bg1.png")}

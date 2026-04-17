@@ -15,7 +15,9 @@ export default function index() {
   const [userID, setUserID] = useState<string>("");
   const [userName, setUserName] = useState<string>("");
   const [messages, setMessages] = useState<any[]>([]);
+  const API_URL = (process.env.EXPO_PUBLIC_API_URL || "http://localhost:7070").replace(/\/$/, "");
   const insets = useSafeAreaInsets();
+
 
   useEffect(() => {
     loadOrCreateUserSession();
@@ -54,7 +56,7 @@ export default function index() {
     if (!text.trim()) return; // Evita enviar mensagens vazias
 
     try {
-      const response = await fetch('http://localhost:7070/api/postMessage', {
+      const response = await fetch(`${API_URL}/api/postMessage`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -76,7 +78,7 @@ export default function index() {
 
   async function loadMessages() {
     try {
-      const response = await fetch('http://localhost:7070/api/getMessage');
+      const response = await fetch(`${API_URL}/api/getMessage`);
       const result = await response.json();
       if (response.ok && result.success) {
          const formattedMessages = result.data.map((msg: any) => ({

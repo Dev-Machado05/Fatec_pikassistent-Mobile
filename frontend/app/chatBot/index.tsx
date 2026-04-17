@@ -13,17 +13,11 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 
-const getApiUrl = () => {
-  return process.env.EXPO_PUBLIC_API_URL || 'http://localhost:7070';
-};
-
-const API_URL = getApiUrl();
-
-
 export default function index() {
   const insets = useSafeAreaInsets();
   const [messages, setMessages] = useState<any[]>([]);
   const [inputText, setInputText] = useState("");
+  const API_URL = (process.env.EXPO_PUBLIC_API_URL || "http://localhost:7070").replace(/\/$/, "");
 
   const generateId = () => {
     return Date.now().toString() + Math.random().toString(36).substr(2, 9);

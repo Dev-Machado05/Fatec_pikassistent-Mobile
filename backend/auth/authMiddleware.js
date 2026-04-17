@@ -1,4 +1,4 @@
-const admin = require("../config/firebaseAdmin");
+const admin = require("./firebaseAdmin");
 
 module.exports = async function auth(req, res, next) {
   try {
