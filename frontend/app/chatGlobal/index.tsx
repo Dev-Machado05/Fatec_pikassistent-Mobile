@@ -10,23 +10,64 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { auth, db } from "@/assets/services/firebaseConfig";
+import { collection, addDoc, query, orderBy, onSnapshot, Timestamp } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
 
 export default function index() {
   const [userID, setUserID] = useState<string>("");
   const [userName, setUserName] = useState<string>("");
   const [messages, setMessages] = useState<any[]>([]);
+  const [user, setUser] = useState<any>(null);
   const API_URL = (process.env.EXPO_PUBLIC_API_URL || "http://localhost:7070").replace(/\/$/, "");
   const insets = useSafeAreaInsets();
 
-
-  useEffect(() => {
+/* useEffect(() => {
     loadOrCreateUserSession();
-  }, []);
+  }, []); */
 
-  useEffect(() => {    if (userID) {
+/*  useEffect(() => {    if (userID) {
       loadMessages();
     }
-  }, [userID]); 
+  }, [userID]);  */ 
+  
+
+  useEffect(() => {
+    if (!userID) return; // Aguarda até que o userID seja definido
+
+    const q = query(collection(db, "messages"), orderBy("timestamp", "desc"));
+    
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const loadedMessages = snapshot.docs.map((doc) => ({
+        id : doc.id,
+        message: doc.data().text,
+        senderID: doc.data().senderId,
+        senderName: doc.data().senderName,
+        Timestamp: doc.data().timestamp
+      }));
+      setMessages(loadedMessages);
+    });
+
+    return () => unsubscribe();
+  }, [userID]);
+
+
+  useEffect(() => {
+    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      if (currentUser) {
+        setUserID(currentUser.uid);
+        const displayName = currentUser.displayName || currentUser.email?.split('@')[0] || 'Usuário';
+        setUserName(displayName);
+        console.log("Usuário autenticado:", displayName);
+      } else {
+        console.log("Nenhum usuário autenticado, usando sessão anônima.");
+        loadOrCreateUserSession();
+      }
+    });
+    return () => unsubscribeAuth();
+    }, []);
 
   async function loadOrCreateUserSession() {
     try {
@@ -46,12 +87,12 @@ export default function index() {
     } catch (error) {
       console.error('Erro criando ou carregando sessão anônima:', error);
 
-      setUserID('temp_${date.now()}');
+      setUserID(`temp_${Date.now()}`);
       setUserName('visitante');
     } 
   }
 
-  async function sendMessage(text: string) {
+/*   async function sendMessage(text: string) {
     console.log("teste de função!!! " + text);
     if (!text.trim()) return; // Evita enviar mensagens vazias
 
@@ -74,9 +115,34 @@ export default function index() {
     } catch (error) {
       console.error('Erro enviando mensagem:', error);
     }
+  } */ // antiga função de envio, sem integração com Firebase
+
+  async function sendMessage(text: string) {
+    console.log("Enviando mensagem:", text);
+    if (!text.trim()) return; // Evita enviar mensagens vazias 
+
+    const isUserLoggedIn = !!user; // Verifica se o usuário está autenticado
+    const finalUserID = user.uid || userID; // Usa o UID do Firebase se disponível, caso contrário usa o ID da sessão anônima
+    const finalUserName = user.displayName || userName; // Usa o displayName do Firebase se disponível, caso contrário usa o nome da sessão anônima
+
+    console.log('enviar mensagem com: ${finalUserID} (${isUserLoggedIn ? "autenticado" : "anônimo"}) - ${finalUserName}');
+
+    try {
+      await addDoc(collection(db, "messages"), {
+        text: text,
+        senderId: userID,
+        senderName: userName,
+        timestamp: Date.now(),
+        isAnonymous: !isUserLoggedIn
+      });
+
+      console.log("Mensagem enviada com sucesso!");
+    } catch (error) {
+      console.error("Erro enviando mensagem:", error);
+    }
   }
 
-  async function loadMessages() {
+/*   async function loadMessages() {
     try {
       const response = await fetch(`${API_URL}/api/getMessage`);
       const result = await response.json();
@@ -92,7 +158,7 @@ export default function index() {
     } catch (error) {      
       console.error('Erro carregando mensagens:', error);
     }
-  }
+  } */ // antiga função de carregamento, sem integração com Firebase. Não é mais necessária, pois o Firebase entrega as mensagens em tempo real via onSnapshot.
 
   return (
     <ImageBackground
