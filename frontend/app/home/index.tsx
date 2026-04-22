@@ -86,6 +86,8 @@ export default function home() {
         { name: "pokedex", url: "/Pokedex" },
         { name: "chatGlobal", url: "/chatGlobal" },
         { name: "chatBot", url: "/chatBot" },
+        { name: "qual é esse pokemon?", url: "/game" },
+        { name: "ranking qual é esse pokemon?", url: "/ranking" }
       ]);
       setFetchedRecent(true);
     });
@@ -98,6 +100,10 @@ export default function home() {
       case "chatGlobal":
         return require("../../assets/images/chatDefault.png");
       case "chatBot":
+        return require("../../assets/images/premierball.png");
+      case "qual é esse pokemon?":
+        return require("../../assets/images/premierball.png");
+      case "ranking qual é esse pokemon?":
         return require("../../assets/images/premierball.png");
       case "build":
         return require("../../assets/images/premierball.png");
