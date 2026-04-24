@@ -1,12 +1,16 @@
 import {
+  Animated,
   Image,
+  Keyboard,
+  KeyboardEvent,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function Footer({
@@ -16,13 +20,58 @@ export default function Footer({
   reqFunction: Function;
   type: "chatBot" | "chatGlobal";
 }) {
-  const [writtedText, setWrittedText] = useState<String>("");
+  const [writtedText, setWrittedText] = useState<string>("");
+  const translateY = useRef(new Animated.Value(0)).current;
   const insets = useSafeAreaInsets();
 
+  useEffect(() => {
+    const animateFooter = (toValue: number, duration: number) => {
+      Animated.timing(translateY, {
+        toValue,
+        duration,
+        useNativeDriver: true,
+      }).start();
+    };
+
+    const onKeyboardShow = (event: KeyboardEvent) => {
+      const keyboardHeight = event.endCoordinates.height;
+      const offset = Platform.OS === "ios"
+        ? Math.max(0, keyboardHeight - insets.bottom)
+        : keyboardHeight;
+
+      animateFooter(-offset, event.duration ?? 250);
+    };
+
+    const onKeyboardHide = (event: KeyboardEvent) => {
+      animateFooter(0, event.duration ?? 250);
+    };
+
+    const showSubscription = Keyboard.addListener(
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow",
+      onKeyboardShow
+    );
+
+    const hideSubscription = Keyboard.addListener(
+      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide",
+      onKeyboardHide
+    );
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, [insets.bottom, translateY]);
+
   return (
-    <View style={[styles.footerInputContainer, { paddingBottom: insets.bottom }]}>
+    <Animated.View
+      style={[
+        styles.footerInputContainer,
+        { paddingBottom: insets.bottom, transform: [{ translateY }] },
+      ]}
+    >
       <TextInput
           style={styles.footerTextInput}
+          value={writtedText}
           onChangeText={(text) => {
             setWrittedText(text);
           }}
@@ -31,13 +80,15 @@ export default function Footer({
         />
         <Pressable
           onPress={() => {
-            reqFunction(writtedText)
+            reqFunction(writtedText);
+            setWrittedText("");
+            Keyboard.dismiss();
           }}
           style={styles.footerSubmitButton}
         >
           <Text style={{ color: "#fff" }}>Enviar</Text>
         </Pressable>
-    </View>
+    </Animated.View>
   );
 }
 
@@ -56,6 +107,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
     borderRadius: 6,
     paddingHorizontal: 10,
+    marginBottom: 9
   },
   footerSubmitButton: {
     marginLeft: 10,
@@ -63,5 +115,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     justifyContent: "center",
     borderRadius: 6,
+    marginBottom: 9
   },
 });

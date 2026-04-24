@@ -1,5 +1,5 @@
 import getScreenSize from "@/assets/helper/getScreenSize";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   Dimensions,
@@ -13,6 +13,7 @@ import {
 } from "react-native";
 
 export default function LandingPage() {
+  const route = useRouter();
   return (
     <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
       {/* Hero Section */}
@@ -31,13 +32,16 @@ export default function LandingPage() {
             </Text>
           </View>
 
-          <Link href={"./home"} asChild>
-            <Pressable style={styles.ctaButton}>
-              <Text style={styles.ctaButtonText}>
-                ⚡ Comece a montar a sua jornada aqui!
-              </Text>
-            </Pressable>
-          </Link>
+          <Pressable
+            style={styles.ctaButton}
+            onPress={() => {
+              route.replace("/home");
+            }}
+          >
+            <Text style={styles.ctaButtonText}>
+              ⚡ Comece a montar a sua jornada aqui!
+            </Text>
+          </Pressable>
 
           <View style={styles.heroIntro}>
             <Text style={styles.introTitle}>O Que é o Pikassistent?</Text>
@@ -156,16 +160,22 @@ export default function LandingPage() {
 
           {/* botões autentificação */}
           <View style={styles.authContainer}>
-            <Link href={"./auth/signUp"} asChild>
-              <Pressable style={styles.signUpButton}>
-                <Text style={styles.signUpButtonText}>Criar Conta Grátis</Text>
-              </Pressable>
-            </Link>
-            <Link href={"/auth/login"} asChild>
-              <Pressable style={styles.loginButton}>
-                <Text style={styles.loginButtonText}>Fazer Login</Text>
-              </Pressable>
-            </Link>
+            <Pressable
+              style={styles.signUpButton}
+              onPress={() => {
+                route.replace("/auth/signUp");
+              }}
+            >
+              <Text style={styles.signUpButtonText}>Criar Conta Grátis</Text>
+            </Pressable>
+            <Pressable
+              style={styles.loginButton}
+              onPress={() => {
+                route.replace("/auth/login");
+              }}
+            >
+              <Text style={styles.loginButtonText}>Fazer Login</Text>
+            </Pressable>
           </View>
         </View>
       </View>

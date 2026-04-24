@@ -24,7 +24,7 @@ export default function home() {
   // const navigation = useNavigation<NavigationProp<recentItemsList>>();
   const [searchItem, setSearchItem] = useState<string>("");
   const [recentAccess, setRecentAccess] = useState<
-    Array<{ name: string; url: string }>
+    Array<{ name: string; url: string; id: string }>
   >([]);
   const [fetchedRecent, setFetchedRecent] = useState<boolean>(false);
   const [mostRecentMessage, setMostRecentMessage] = useState<String>("");
@@ -81,29 +81,30 @@ export default function home() {
         setRecentAccess([]);
       }
     }
-    getRecentAccess().then(() => {  // change this logic
+    getRecentAccess().then(() => {
+      // change this logic Maximun of 3 recent pages 
       setRecentAccess([
-        { name: "pokedex", url: "/Pokedex" },
-        { name: "chatGlobal", url: "/chatGlobal" },
-        { name: "chatBot", url: "/chatBot" },
-        { name: "qual é esse pokemon?", url: "/game" },
-        { name: "ranking qual é esse pokemon?", url: "/ranking" }
+        // { name: "pokedex", url: "/Pokedex", id:"pokedex" },
+        // { name: "chatGlobal", url: "/chatGlobal", id: "chatGlobal" },
+        { name: "chatBot", url: "/chatBot", id: "chatBot" },
+        { name: "pokeQuiz", url: "/game", id: "pokemonQuiz" },
+        { name: "ranking pokeQuiz", url: "/ranking", id: "rankingPokemonQuiz" },
       ]);
       setFetchedRecent(true);
     });
   }, []);
 
-  function getRecentAccessImage(name: String) {
-    switch (name) {
+  function getRecentAccessImage(identifier: String) {
+    switch (identifier) {
       case "pokedex":
         return require("../../assets/images/pokedexIcon.png");
       case "chatGlobal":
         return require("../../assets/images/chatDefault.png");
       case "chatBot":
         return require("../../assets/images/premierball.png");
-      case "qual é esse pokemon?":
+      case "pokemonQuiz":
         return require("../../assets/images/premierball.png");
-      case "ranking qual é esse pokemon?":
+      case "rankingPokemonQuiz":
         return require("../../assets/images/premierball.png");
       case "build":
         return require("../../assets/images/premierball.png");
@@ -151,7 +152,7 @@ export default function home() {
                     style={styles.recentAccessItemContainer}
                   >
                     <Image
-                      source={getRecentAccessImage(value.name)}
+                      source={getRecentAccessImage(value.id)}
                       style={styles.recentAccessItemImage}
                       resizeMode="contain"
                     />
@@ -267,7 +268,8 @@ const styles = StyleSheet.create({
     color: "#ffffff",
   },
   recentAccessContainer: {
-    width: "100%",
+    width: "auto",
+    maxWidth: "100%",
     flexDirection: "row",
     justifyContent: "space-around",
     backgroundColor: "#2C2A3E",
@@ -275,6 +277,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   recentAccessItemContainer: {
+    width: "30%",
     alignItems: "center",
   },
   recentAccessItemImage: {
@@ -282,6 +285,8 @@ const styles = StyleSheet.create({
     width: 50,
   },
   recentAccessItemName: {
+    maxWidth: 120,
+    textAlign: "center",
     color: "#ffffff",
   },
 

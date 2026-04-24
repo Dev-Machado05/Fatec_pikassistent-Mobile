@@ -1,8 +1,10 @@
-import Constants from 'expo-constants';
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
+  Animated,
   Image,
   ImageBackground,
+  Keyboard,
+  KeyboardEvent,
   Platform,
   ScrollView,
   StyleSheet,
@@ -17,7 +19,46 @@ export default function index() {
   const insets = useSafeAreaInsets();
   const [messages, setMessages] = useState<any[]>([]);
   const [inputText, setInputText] = useState("");
+  const translateY = useRef(new Animated.Value(0)).current;
   const API_URL = (process.env.EXPO_PUBLIC_API_URL || "http://localhost:7070").replace(/\/$/, "");
+
+  useEffect(() => {
+    const animateInput = (toValue: number, duration: number) => {
+      Animated.timing(translateY, {
+        toValue,
+        duration,
+        useNativeDriver: true,
+      }).start();
+    };
+
+    const onKeyboardShow = (event: KeyboardEvent) => {
+      const keyboardHeight = event.endCoordinates.height;
+      const offset = Platform.OS === "ios"
+        ? Math.max(0, keyboardHeight - insets.bottom)
+        : keyboardHeight;
+
+      animateInput(-offset, event.duration ?? 250);
+    };
+
+    const onKeyboardHide = (event: KeyboardEvent) => {
+      animateInput(0, event.duration ?? 250);
+    };
+
+    const showSubscription = Keyboard.addListener(
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow",
+      onKeyboardShow
+    );
+
+    const hideSubscription = Keyboard.addListener(
+      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide",
+      onKeyboardHide
+    );
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, [insets.bottom, translateY]);
 
   const generateId = () => {
     return Date.now().toString() + Math.random().toString(36).substr(2, 9);
@@ -122,7 +163,12 @@ export default function index() {
       ))}
     </ScrollView>
 
-    <View style={[styles.inputArea, {paddingBottom: insets.bottom}]}>
+    <Animated.View
+      style={[
+        styles.inputArea,
+        { paddingBottom: insets.bottom, transform: [{ translateY }] },
+      ]}
+    >
       <TextInput
         style={styles.input}
         value={inputText}
@@ -133,7 +179,7 @@ export default function index() {
       <TouchableOpacity style={styles.button} onPress={sendMessage}>
         <Text style={{ color: "#fff" }}>Enviar</Text>
       </TouchableOpacity>
-    </View>
+    </Animated.View>
   </ImageBackground>
 );
 }
@@ -199,13 +245,15 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 6,
     paddingHorizontal: 10,
+    marginBottom: 9,
   },
-
+  
   button: {
     marginLeft: 10,
     backgroundColor: "#ff7a29",
     paddingHorizontal: 15,
     justifyContent: "center",
     borderRadius: 6,
+    marginBottom: 9,
   },
 });

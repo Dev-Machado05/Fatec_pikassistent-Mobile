@@ -188,7 +188,7 @@ export default function index() {
                   require("../../assets/images/pika.png") // fetch user Image
                 }
               />
-              <View>
+              <View style={styles.messageTextContainer}>
                 <Text
                   style={
                     item.senderID === userID
@@ -234,13 +234,16 @@ const styles = StyleSheet.create({
     alignSelf: "flex-end",
     flexDirection: "row",
     marginVertical: 10,
-    maxWidth: "75%",
+    maxWidth: "100%",
   },
   messageContainer: {
     alignSelf: "flex-start",
     flexDirection: "row-reverse",
     marginVertical: 10,
-    maxWidth: "75%",
+    maxWidth: "100%",
+  },
+  messageTextContainer: {
+    alignItems: "flex-end"
   },
   actUserName: {
     color: "#000000",
@@ -277,11 +280,13 @@ const styles = StyleSheet.create({
     height: 40,
   },
   messageContent: {
+    maxWidth: "75%",
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
   },
   actUserMessageContent: {
+    maxWidth: "75%",
     flexDirection: "row-reverse",
     alignItems: "center",
     gap: 10,
