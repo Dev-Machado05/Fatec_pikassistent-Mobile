@@ -3,14 +3,17 @@ import React, { useEffect, useState } from "react";
 import {
   Image,
   ImageBackground,
+  Pressable,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from "react-native";
+import { useRouter } from "expo-router";
 import PokemonList from "./components/PokemonList";
 
 export default function Pokedex() {
+  const router = useRouter();
   const [pokemon, setPokemon] = useState<any>(null);
   const [selectedPokemonID, setSelectedPokemonID] = useState<string>("1");
   const [pokemonImageSize, setPokemonImageSize] = useState({
@@ -76,7 +79,13 @@ export default function Pokedex() {
               />
             </View>
           )}
-          <Text style={styles.pokedexTopText}>Clique aqui para ver mais</Text>
+          <Pressable
+            onPress={() => router.push(`/Pokedex/${selectedPokemonID}` as any)}
+            android_ripple={{ color: "#00000020" }}
+            style={({ pressed }) => ({ opacity: pressed ? 0.75 : 1 })}
+          >
+            <Text style={[styles.pokedexTopText, styles.pokedexTopLink]}>Clique aqui para ver mais</Text>
+          </Pressable>
         </View>
       </View>
 
@@ -163,6 +172,11 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 14,
     textAlign: "center",
+  },
+  pokedexTopLink: {
+    color: "#ffd28a",
+    textDecorationLine: "underline",
+    fontWeight: "700",
   },
 
   ///
