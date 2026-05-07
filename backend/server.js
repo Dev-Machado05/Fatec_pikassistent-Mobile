@@ -3,9 +3,12 @@ const cors = require('cors');
 const express = require('express');
 const crypto = require('crypto');
 const auth = require('./auth/authMiddleware');
+const admin = require('./auth/firebaseAdmin');
 const Groq = require('groq-sdk');
 
 const app = express();
+const db = admin.firestore();
+const CARD_ROLL_COST = 5;
 
 // Infra da API: configuracao de CORS e preflight.
 app.use((req, res, next) => {
@@ -25,6 +28,95 @@ app.use(express.json());
 const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
 });
+
+function normalizeInventoryItem(card) {
+  return {
+    id: card.id,
+    name: card.name,
+    number: card.number,
+    image: card.image,
+    imagem: card.image,
+    rarity: card.rarity ?? null,
+    set: card.set ?? null,
+    quantity: card.quantity ?? 1,
+    timestamp: card.timestamp ?? new Date().toISOString(),
+  };
+}
+
+async function updateUserTokensAndInventory({ userId, card, tokenCost = CARD_ROLL_COST }) {
+  if (!userId) {
+    throw new Error('ID do usuário faltando.');
+  }
+
+  if (!card?.id) {
+    throw new Error('Carta inválida.');
+  }
+
+  return db.runTransaction(async (transaction) => {
+    const userRef = db.collection('users').doc(userId);
+    const userSnapshot = await transaction.get(userRef);
+
+    if (!userSnapshot.exists) {
+      throw new Error('Usuário não encontrado.');
+    }
+
+    const userData = userSnapshot.data() || {};
+    const currentTokenAmount = Number(userData.tokenAmount ?? 0);
+
+    if (!Number.isFinite(currentTokenAmount) || currentTokenAmount < tokenCost) {
+      throw new Error('Quantidade de tokens insuficiente.');
+    }
+
+    const inventory = Array.isArray(userData.inventory) ? [...userData.inventory] : [];
+    const normalizedCard = normalizeInventoryItem(card);
+    const existingCardIndex = inventory.findIndex((item) => item.id === normalizedCard.id);
+
+    if (existingCardIndex >= 0) {
+      const existingCard = inventory[existingCardIndex];
+      inventory[existingCardIndex] = {
+        ...existingCard,
+        ...normalizedCard,
+        quantity: Number(existingCard.quantity ?? 1) + 1,
+        timestamp: existingCard.timestamp ?? normalizedCard.timestamp,
+      };
+    } else {
+      inventory.push(normalizedCard);
+    }
+
+    const updatedTokenAmount = currentTokenAmount - tokenCost;
+
+    transaction.update(userRef, {
+      tokenAmount: updatedTokenAmount,
+      inventory,
+    });
+
+    return {
+      tokenAmount: updatedTokenAmount,
+      inventory,
+    };
+  });
+}
+
+async function getUserCardsById(userId) {
+  if (!userId) {
+    throw new Error('ID do usuário faltando.');
+  }
+
+  const userRef = db.collection('users').doc(userId);
+  const userSnapshot = await userRef.get();
+
+  if (!userSnapshot.exists) {
+    throw new Error('Usuário não encontrado.');
+  }
+
+  const userData = userSnapshot.data() || {};
+
+  return {
+    userId,
+    tokenAmount: Number(userData.tokenAmount ?? 0),
+    inventory: Array.isArray(userData.inventory) ? userData.inventory : [],
+  };
+}
 
 let messages = [
   {
@@ -116,6 +208,84 @@ app.post('/api/chat', async (req, res) => {
   } catch (error) {
     console.error('Error generating chat completion:', error);
     res.status(400).json({ success: false, error: error.message });
+  }
+});
+
+// "rodar" uma carta
+app.post('/api/rollCard', async (req, res) => {
+  try {
+    const { userId, userInventory } = req.body;
+    const resolvedUserId = userId || userInventory?.userId || userInventory?.uid || userInventory?.docId;
+    const currentTokenAmount = Number(userInventory?.tokenAmount ?? 0);
+
+    if (!resolvedUserId) {
+      return res.status(400).json({
+        success: false,
+        error: 'ID do usuário faltando.',
+      });
+    }
+
+    if (currentTokenAmount < CARD_ROLL_COST) {
+      return res.status(400).json({
+        success: false,
+        error: 'Quantidade de tokens insuficiente',
+      });
+    }
+
+    const resp = await fetch('https://api.carddex.dev/v1/cards/random');
+    const data = await resp.json();
+
+    if (!resp.ok || !data?.data?.id) {
+      return res.status(502).json({
+        success: false,
+        error: 'Não foi possível sortear uma carta.',
+      });
+    }
+
+    const cardResp = {
+      cardID: data.data.id,
+      name: data.data.name,
+      number: data.data.number,
+      image: data.data.image_url,
+    };
+
+    const updatedUser = await updateUserTokensAndInventory({
+      userId: resolvedUserId,
+      card: cardResp,
+      tokenCost: CARD_ROLL_COST,
+    });
+
+    res.status(200).json({
+      success: true,
+      cardResp,
+      tokenAmount: updatedUser.tokenAmount,
+      inventory: updatedUser.inventory,
+    });
+  } catch(err) {
+    console.error(err);
+
+    res.status(400).json({
+      success: false,
+      error: err.message,
+    });
+  }
+});
+
+// pegar todas as cartas do inventário do usuário
+app.get('/api/users/:userId/cards', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const userCards = await getUserCardsById(userId);
+
+    res.status(200).json({
+      success: true,
+      ...userCards,
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      error: error.message,
+    });
   }
 });
 
