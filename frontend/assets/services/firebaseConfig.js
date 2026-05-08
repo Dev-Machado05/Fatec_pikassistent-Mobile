@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { initializeAuth, getReactNativePersistence } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import ReactNativeAsyncStorage from "@react-native-async-storage/async-storage";
 
 function getEnv(name) {
   const rawValue = process.env[name];
@@ -26,7 +27,9 @@ const firebaseConfig = {
 };
 
 if (!firebaseApiKey) {
-  throw new Error("Missing Firebase API key. Set EXPO_PUBLIC_FIREBASE_API_KEY in your .env file.");
+  throw new Error(
+    "Missing Firebase API key. Set EXPO_PUBLIC_FIREBASE_API_KEY in your .env file.",
+  );
 }
 
 if (!firebaseApiKey.startsWith("AIza")) {
@@ -37,6 +40,8 @@ if (!firebaseApiKey.startsWith("AIza")) {
 
 const app = initializeApp(firebaseConfig);
 
-export const auth = getAuth(app);
+const persistence = getReactNativePersistence(ReactNativeAsyncStorage);
+
+export const auth = initializeAuth(app, { persistence });
 export const db = getFirestore(app);
 // export const googleProvider = new GoogleAuthProvider(); // libera o login através do google

@@ -12,8 +12,14 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { BlurView } from "expo-blur";
 import PokedexCarroussel from "./components/homePokedexCarroussel/homePokedexCarroussel";
 import { useRouter } from "expo-router";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "@/assets/services/firebaseConfig";
+import useAuth from "@/assets/hooks/useAuth";
+import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
+
 
 type recentItemsList = {
   recentOption: { url: string };
@@ -22,6 +28,7 @@ type recentItemsList = {
 export default function home() {
   const router = useRouter();
   // const navigation = useNavigation<NavigationProp<recentItemsList>>();
+  const API_URL = (process.env.EXPO_PUBLIC_API_URL || "http://localhost:7070").replace(/\/$/, "");
   const [searchItem, setSearchItem] = useState<string>("");
   const [recentAccess, setRecentAccess] = useState<
     Array<{ name: string; url: string; id: string }>
@@ -34,6 +41,30 @@ export default function home() {
   }>({ state: false, message: "" });
   const [fetchedRecentMessages, setFetchedRecentMessages] =
     useState<boolean>(true);
+  const [raffleImage, setRaffleImage] = useState<string>("");
+  const [user, setUser] = useState<any>();
+  const [userID, setUserID] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string | null>(null);
+  const [tokenAmount, setTokenAmount] = useState<number>(0)
+  
+  const [userInventoryLoading, setUserInventoryLoading] = useState<boolean>(false);
+
+  // function to get the needed data from the API
+  useEffect(() => {
+    async function getUserToken() {
+      const res = await fetch(`${API_URL}/api/users/${userID}/tokens`);
+      const data = await res.json();
+
+      setTokenAmount(data.tokens + 50);
+    }
+
+    const { userID: currentUserID, userName: currentUserName } = useAuth();
+    
+    setUserID(currentUserID);
+    setUserName(currentUserName);
+    
+    getUserToken()
+  }, []);
 
   useEffect(() => {
     async function getRecentMessage() {
@@ -82,7 +113,7 @@ export default function home() {
       }
     }
     getRecentAccess().then(() => {
-      // change this logic Maximun of 3 recent pages 
+      // change this logic Maximun of 3 recent pages
       setRecentAccess([
         // { name: "pokedex", url: "/Pokedex", id:"pokedex" },
         // { name: "chatGlobal", url: "/chatGlobal", id: "chatGlobal" },
@@ -92,6 +123,21 @@ export default function home() {
       ]);
       setFetchedRecent(true);
     });
+  }, []);
+
+  // get a random card
+  useEffect(() => {
+    async function getRaffleImage() {
+      try {
+        const res = await fetch("https://api.carddex.dev/v1/cards/random");
+        const data: any = await res.json();
+        setRaffleImage(data?.data?.image_url || "");
+      } catch (err) {
+        setRaffleImage("");
+      }
+    }
+
+    getRaffleImage();
   }, []);
 
   function getRecentAccessImage(identifier: String) {
@@ -110,6 +156,35 @@ export default function home() {
         return require("../../assets/images/premierball.png");
       default:
         return require("../../assets/images/premierball.png");
+    }
+  }
+
+  async function handleRollCard() {
+    try {
+      if (!userID) {
+        console.warn('Id do usuário não encontrado.');
+      }
+
+      const response = await fetch(`${API_URL}/api/rollCard`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: userID,
+          token: tokenAmount,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: any = await response.json();
+      // backend returns card in `cardResp` with `image` or `imagem`
+      const img = data?.cardResp?.image || data?.cardResp?.imagem || data?.data?.image_url || '';
+      setRaffleImage(img || '');
+    } catch (err) {
+      console.error("Erro ao sortear carta:", err);
+      setRaffleImage("");
     }
   }
 
@@ -193,25 +268,23 @@ export default function home() {
         <Text style={styles.pokedexTitle}>Pokedex:</Text>
         <PokedexCarroussel />
       </ImageBackground>
-      <Text>
-        Far far away, behind the word mountains, far from the countries Vokalia
-        and Consonantia, there live the blind texts. Separated they live in
-        Bookmarksgrove right at the coast of the Semantics, a large language
-        ocean. A small river named Duden flows by their place and supplies it
-        with the necessary regelialia. It is a paradisematic country, in which
-        roasted parts of sentences fly into your mouth. Even the all-powerful
-        Pointing has no control about the blind texts it is an almost
-        unorthographic life One day however a small line of blind text by the
-        name of Lorem Ipsum decided to leave for the far World of Grammar. The
-        Big Oxmox advised her not to do so, because there were thousands of bad
-        Commas, wild Question Marks and devious Semikoli, but the Little Blind
-        Text didn’t listen. She packed her seven versalia, put her initial into
-        the belt and made herself on the way. When she reached the first hills
-        of the Italic Mountains, she had a last view back on the skyline of her
-        hometown Bookmarksgrove, the headline of Alphabet Village and the
-        subline of her own road, the Line Lane. Pityful a rethoric question ran
-        over her cheek, then
-      </Text>
+      <View style={styles.tcgCardStoreContainer}>
+        <Text style={styles.tcgCardStoreTitle}>TCG Card Store:</Text>
+        <Text style={styles.tcgCardStoreIntro}>Far far away, behind the word mountains</Text>
+        <Pressable style={styles.raffleContainer} onPress={handleRollCard}>
+          <ImageBackground
+            source={
+              raffleImage && raffleImage.length > 0
+                ? { uri: raffleImage }
+                : require("../../assets/images/premierball.png") // imagem temporária, trocar + para frente
+            }
+            style={styles.raffleBackground}
+            resizeMode="cover"
+          >
+            <BlurView intensity={70} tint="light" style={styles.raffleBlur} />
+          </ImageBackground>
+        </Pressable>
+      </View>
     </View>
   );
 }
@@ -316,5 +389,23 @@ const styles = StyleSheet.create({
     width: "80%",
     fontSize: 18,
     fontWeight: "600",
+  },
+  tcgCardStoreContainer: {},
+  tcgCardStoreTitle: {},
+  tcgCardStoreIntro: {},
+  raffleContainer: {
+    borderRadius: 5,
+    overflow: "hidden",
+  },
+  raffleBackground: {
+    width: 201,
+    height: 284,
+    mixBlendMode: "luminosity",
+    filter: "grayscale(100%)",
+    borderRadius: 5,
+    overflow: "hidden",
+  },
+  raffleBlur: {
+    ...StyleSheet.absoluteFillObject,
   },
 });

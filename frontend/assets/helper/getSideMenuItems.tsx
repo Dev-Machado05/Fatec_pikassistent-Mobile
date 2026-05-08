@@ -23,6 +23,11 @@ export default function getSideMenuItems() {
         Icon: require("../images/pokedexIcon.png"),
         link: "/Pokedex" 
     },
+    {
+      name: "Logout",
+      Icon: require("../images/homeIcon.png"),
+      link: "/landingPage"
+    }
   ];
 
   return sideMenuItems;
