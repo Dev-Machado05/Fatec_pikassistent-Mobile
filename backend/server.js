@@ -4,7 +4,7 @@ const express = require('express');
 const crypto = require('crypto');
 const auth = require('./auth/authMiddleware');
 const Groq = require('groq-sdk');
-
+const {db} = require('./auth/firebaseAdmin'); // Importa o Firestore do Firebase Admin
 const app = express();
 
 // Infra da API: configuracao de CORS e preflight.
@@ -118,5 +118,8 @@ app.post('/api/chat', async (req, res) => {
     res.status(400).json({ success: false, error: error.message });
   }
 });
+
+const dailyPokemonRouter = require('./api/dailyPokemon');
+app.use('/api', dailyPokemonRouter);
 
 module.exports = app;
