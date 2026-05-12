@@ -272,19 +272,23 @@ app.post("/api/rollCard", async (req, res) => {
       });
     }
 
+    // Compatibiliza com o frontend: image e imagem
     const cardResp = {
       cardID: data.data.id,
       name: data.data.name,
       number: data.data.number,
       image: data.data.image_url,
+      imagem: data.data.image_url,
     };
 
+    // Corrige para userId
     const updatedUser = await updateUserTokensAndInventory({
-      userId: resolvedUserId,
+      userId: userId,
       card: cardResp,
       tokenCost: CARD_ROLL_COST,
     });
 
+    // Retorna tokenAmount atualizado
     res.status(200).json({
       success: true,
       cardResp,
@@ -292,7 +296,6 @@ app.post("/api/rollCard", async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-
     res.status(400).json({
       success: false,
       error: err.message,

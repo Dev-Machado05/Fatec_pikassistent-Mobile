@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { auth } from "@/assets/services/firebaseConfig";
 
@@ -8,33 +9,33 @@ type UseAuthResult = {
   loading: boolean;
 };
 
-export default function useAuth() {
-  let user: User | null = null;
-  let userID: string | null = null;
-  let userName: string | null = null;
-  let loading = true;
+export default function useAuth(): UseAuthResult {
+  const [user, setUser] = useState<User | null>(null);
+  const [userID, setUserID] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
-    user = currentUser;
-
-    if (currentUser) {
-      userID = currentUser.uid;
-      userName =
-        currentUser.displayName ||
-        currentUser.email?.split("@")[0] ||
-        "Usuário";
-    } else {
-      userID = null;
-      userName = null;
-    }
-
-    loading = false;
-  });
-
-  unsubscribeAuth();
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      if (currentUser) {
+        setUserID(currentUser.uid);
+        setUserName(
+          currentUser.displayName ||
+          currentUser.email?.split("@")[0] ||
+          "Usuário"
+        );
+      } else {
+        setUserID(null);
+        setUserName(null);
+      }
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
 
   return { user, userID, userName, loading };
-} 
+}
 
 /*
 Exemplo de uso:

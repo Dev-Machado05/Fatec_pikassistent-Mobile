@@ -25,9 +25,9 @@ type recentItemsList = {
   recentOption: { url: string };
 };
 
+
 export default function home() {
   const router = useRouter();
-  // const navigation = useNavigation<NavigationProp<recentItemsList>>();
   const API_URL = (process.env.EXPO_PUBLIC_API_URL || "http://localhost:7070").replace(/\/$/, "");
   const [searchItem, setSearchItem] = useState<string>("");
   const [recentAccess, setRecentAccess] = useState<
@@ -39,32 +39,23 @@ export default function home() {
     state: boolean;
     message: String;
   }>({ state: false, message: "" });
-  const [fetchedRecentMessages, setFetchedRecentMessages] =
-    useState<boolean>(true);
+  const [fetchedRecentMessages, setFetchedRecentMessages] = useState<boolean>(true);
   const [raffleImage, setRaffleImage] = useState<string>("");
-  const [user, setUser] = useState<any>();
-  const [userID, setUserID] = useState<string | null>(null);
-  const [userName, setUserName] = useState<string | null>(null);
-  const [tokenAmount, setTokenAmount] = useState<number>(0)
-  
+  const [tokenAmount, setTokenAmount] = useState<number>(0);
   const [userInventoryLoading, setUserInventoryLoading] = useState<boolean>(false);
 
-  // function to get the needed data from the API
+  // Pegue userID e userName diretamente do hook
+  let { userID, userName } = useAuth();
+
   useEffect(() => {
     async function getUserToken() {
+      if (!userID) return;
       const res = await fetch(`${API_URL}/api/users/${userID}/tokens`);
       const data = await res.json();
-
       setTokenAmount(data.tokens + 50);
     }
-
-    const { userID: currentUserID, userName: currentUserName } = useAuth();
-    
-    setUserID(currentUserID);
-    setUserName(currentUserName);
-    
-    getUserToken()
-  }, []);
+    getUserToken();
+  }, [userID]);
 
   useEffect(() => {
     async function getRecentMessage() {
@@ -160,11 +151,15 @@ export default function home() {
   }
 
   async function handleRollCard() {
+    console.log("comando iniciado")
+    console.log(userID)
     try {
       if (!userID) {
         console.warn('Id do usuário não encontrado.');
+        return;
       }
-
+      
+      console.log("iniciando fetch")
       const response = await fetch(`${API_URL}/api/rollCard`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -173,15 +168,17 @@ export default function home() {
           token: tokenAmount,
         }),
       });
-
+      
+      console.log("final fetch")
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-
+      
       const data: any = await response.json();
       // backend returns card in `cardResp` with `image` or `imagem`
       const img = data?.cardResp?.image || data?.cardResp?.imagem || data?.data?.image_url || '';
-      setRaffleImage(img || '');
+      console.log("arrumando imagem")
+      setRaffleImage(img || '');  
     } catch (err) {
       console.error("Erro ao sortear carta:", err);
       setRaffleImage("");
@@ -271,7 +268,7 @@ export default function home() {
       <View style={styles.tcgCardStoreContainer}>
         <Text style={styles.tcgCardStoreTitle}>TCG Card Store:</Text>
         <Text style={styles.tcgCardStoreIntro}>Far far away, behind the word mountains</Text>
-        <Pressable style={styles.raffleContainer} onPress={handleRollCard}>
+        <Pressable style={styles.raffleContainer} onPress={() => {console.log("buttonPressed");handleRollCard()}} /*disabled={!userID}*/>
           <ImageBackground
             source={
               raffleImage && raffleImage.length > 0
