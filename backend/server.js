@@ -1,13 +1,13 @@
+
 require("dotenv").config();
 const cors = require("cors");
 const express = require("express");
 const crypto = require("crypto");
 const auth = require("./auth/authMiddleware");
-const admin = require("./auth/firebaseAdmin");
+const { admin, db } = require("./auth/firebaseAdmin");
 const Groq = require("groq-sdk");
 
 const app = express();
-const db = admin.firestore();
 const CARD_ROLL_COST = 5;
 
 // Infra da API: configuracao de CORS e preflight.
@@ -51,6 +51,7 @@ async function updateUserTokensAndInventory({
   if (!userId) {
     throw new Error("ID do usuário faltando.");
   }
+
 
   if (!card?.id) {
     throw new Error("Carta inválida.");
@@ -274,11 +275,10 @@ app.post("/api/rollCard", async (req, res) => {
 
     // Compatibiliza com o frontend: image e imagem
     const cardResp = {
-      cardID: data.data.id,
+      id: data.data.id,
       name: data.data.name,
       number: data.data.number,
       image: data.data.image_url,
-      imagem: data.data.image_url,
     };
 
     // Corrige para userId

@@ -158,7 +158,7 @@ export default function home() {
         console.warn('Id do usuário não encontrado.');
         return;
       }
-      
+
       console.log("iniciando fetch")
       const response = await fetch(`${API_URL}/api/rollCard`, {
         method: 'POST',
@@ -168,19 +168,37 @@ export default function home() {
           token: tokenAmount,
         }),
       });
-      
+
       console.log("final fetch")
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      let data: any = null;
+      if (response.ok) {
+        data = await response.json();
+        // backend returns card in `cardResp` with `image` or `imagem`
+        const img = data?.cardResp?.image || data?.cardResp?.imagem || data?.data?.image_url || '';
+        console.log("arrumando imagem")
+        setRaffleImage(img || '');
+        // Atualiza o tokenAmount com o valor retornado do backend, se existir
+        if (typeof data.tokenAmount === 'number') {
+          setTokenAmount(data.tokenAmount);
+        }
+      } else {
+        // tenta extrair mensagem de erro do backend
+        let errorMsg = `HTTP error! status: ${response.status}`;
+        try {
+          const errData = await response.json();
+          if (errData && errData.error) {
+            errorMsg = errData.error;
+          }
+        } catch (e) {
+          // resposta não era JSON
+        }
+        console.error("Erro ao sortear carta:", errorMsg);
+        setRaffleImage("");
+        // Opcional: exibir erro para o usuário
+        // alert(errorMsg);
       }
-      
-      const data: any = await response.json();
-      // backend returns card in `cardResp` with `image` or `imagem`
-      const img = data?.cardResp?.image || data?.cardResp?.imagem || data?.data?.image_url || '';
-      console.log("arrumando imagem")
-      setRaffleImage(img || '');  
-    } catch (err) {
-      console.error("Erro ao sortear carta:", err);
+    } catch (error) {
+      console.error("Erro ao sortear carta:", error);
       setRaffleImage("");
     }
   }
