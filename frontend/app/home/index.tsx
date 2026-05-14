@@ -20,15 +20,15 @@ import { auth } from "@/assets/services/firebaseConfig";
 import useAuth from "@/assets/hooks/useAuth";
 import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
 
-
 type recentItemsList = {
   recentOption: { url: string };
 };
 
-
 export default function home() {
   const router = useRouter();
-  const API_URL = (process.env.EXPO_PUBLIC_API_URL || "http://localhost:7070").replace(/\/$/, "");
+  const API_URL = (
+    process.env.EXPO_PUBLIC_API_URL || "http://localhost:7070"
+  ).replace(/\/$/, "");
   const [searchItem, setSearchItem] = useState<string>("");
   const [recentAccess, setRecentAccess] = useState<
     Array<{ name: string; url: string; id: string }>
@@ -39,10 +39,13 @@ export default function home() {
     state: boolean;
     message: String;
   }>({ state: false, message: "" });
-  const [fetchedRecentMessages, setFetchedRecentMessages] = useState<boolean>(true);
+  const [fetchedRecentMessages, setFetchedRecentMessages] =
+    useState<boolean>(true);
   const [raffleImage, setRaffleImage] = useState<string>("");
   const [tokenAmount, setTokenAmount] = useState<number>(0);
-  const [userInventoryLoading, setUserInventoryLoading] = useState<boolean>(false);
+  const [userInventoryLoading, setUserInventoryLoading] =
+    useState<boolean>(false);
+  const [rafflePrice, setRafflePrice] = useState(5);
 
   // Pegue userID e userName diretamente do hook
   let { userID, userName } = useAuth();
@@ -151,34 +154,38 @@ export default function home() {
   }
 
   async function handleRollCard() {
-    console.log("comando iniciado")
-    console.log(userID)
+    console.log("comando iniciado");
+    console.log(userID);
     try {
       if (!userID) {
-        console.warn('Id do usuário não encontrado.');
+        console.warn("Id do usuário não encontrado.");
         return;
       }
 
-      console.log("iniciando fetch")
+      console.log("iniciando fetch");
       const response = await fetch(`${API_URL}/api/rollCard`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userId: userID,
           token: tokenAmount,
         }),
       });
 
-      console.log("final fetch")
+      console.log("final fetch");
       let data: any = null;
       if (response.ok) {
         data = await response.json();
         // backend returns card in `cardResp` with `image` or `imagem`
-        const img = data?.cardResp?.image || data?.cardResp?.imagem || data?.data?.image_url || '';
-        console.log("arrumando imagem")
-        setRaffleImage(img || '');
+        const img =
+          data?.cardResp?.image ||
+          data?.cardResp?.imagem ||
+          data?.data?.image_url ||
+          "";
+        console.log("arrumando imagem");
+        setRaffleImage(img || "");
         // Atualiza o tokenAmount com o valor retornado do backend, se existir
-        if (typeof data.tokenAmount === 'number') {
+        if (typeof data.tokenAmount === "number") {
           setTokenAmount(data.tokenAmount);
         }
       } else {
@@ -285,8 +292,42 @@ export default function home() {
       </ImageBackground>
       <View style={styles.tcgCardStoreContainer}>
         <Text style={styles.tcgCardStoreTitle}>TCG Card Store:</Text>
-        <Text style={styles.tcgCardStoreIntro}>Far far away, behind the word mountains</Text>
-        <Pressable style={styles.raffleContainer} onPress={() => {console.log("buttonPressed");handleRollCard()}} /*disabled={!userID}*/>
+        <View style={styles.tcgCardStoreIntroContainer}>
+          <Text style={styles.tcgCardStoreIntro}>
+            {" "}
+            Selecione o banner de sua preferência e receba uma{" "}
+            <Text style={styles.tcgCardStoreIntro_BlackHighlight}>
+              carta aletória
+            </Text>{" "}
+            ou a{" "}
+            <Text style={styles.tcgCardStoreIntro_BlackHighlight}>
+              carta do banner!
+            </Text>{" "}
+          </Text>
+          <Text style={styles.tcgCardStoreIntro}>
+            OBS:. Cada sorteio gasta 5 fichas que podem ser adquiridas no{" "}
+            <Text
+              style={styles.tcgCardStoreIntro_BlueHighlight}
+              onPress={() => {}}
+            >
+              pokequiz
+            </Text>{" "}
+            e pelo{" "}
+            <Text
+              style={styles.tcgCardStoreIntro_BlueHighlight}
+              onPress={() => {}}
+            >
+              login diario.
+            </Text>
+          </Text>
+        </View>
+        <Pressable
+          style={styles.raffleContainer}
+          onPress={() => {
+            console.log("buttonPressed");
+            handleRollCard();
+          }} /*disabled={!userID}*/
+        >
           <ImageBackground
             source={
               raffleImage && raffleImage.length > 0
@@ -297,6 +338,10 @@ export default function home() {
             resizeMode="cover"
           >
             <BlurView intensity={70} tint="light" style={styles.raffleBlur} />
+            <Image
+              source={require("../../assets/images/tokenIcon.png")}
+            ></Image>
+            <Text>{rafflePrice} Tokens</Text>
           </ImageBackground>
         </Pressable>
       </View>
@@ -405,12 +450,44 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "600",
   },
-  tcgCardStoreContainer: {},
-  tcgCardStoreTitle: {},
+  tcgCardStoreContainer: {
+    alignItems: "center",
+    paddingVertical: 40,
+    gap: 20,
+  },
+  tcgCardStoreTitle: {
+    fontWeight: 700,
+    fontSize: 18,
+    lineHeight: 19,
+    display: "flex",
+    alignItems: "center",
+    textAlign: "center",
+    color: "#000000",
+  },
+  tcgCardStoreIntroContainer: {
+    gap: 25,
+    maxWidth: "70%",
+  },
   tcgCardStoreIntro: {},
   raffleContainer: {
     borderRadius: 5,
     overflow: "hidden",
+  },
+  tcgCardStoreIntro_BlackHighlight: {
+    fontWeight: 700,
+    fontSize: 12,
+    lineHeight: 15,
+    display: "flex",
+    alignItems: "center",
+    color: "#000000",
+  },
+  tcgCardStoreIntro_BlueHighlight: {
+    fontWeight: 700,
+    fontSize: 12,
+    lineHeight: 15,
+    display: "flex",
+    alignItems: "center",
+    color: "#0000ff",
   },
   raffleBackground: {
     width: 201,
@@ -419,6 +496,10 @@ const styles = StyleSheet.create({
     filter: "grayscale(100%)",
     borderRadius: 5,
     overflow: "hidden",
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+    gap: 5,
   },
   raffleBlur: {
     ...StyleSheet.absoluteFillObject,
