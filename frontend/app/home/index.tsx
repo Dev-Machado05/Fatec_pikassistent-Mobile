@@ -328,21 +328,37 @@ export default function home() {
             handleRollCard();
           }} /*disabled={!userID}*/
         >
-          <ImageBackground
-            source={
-              raffleImage && raffleImage.length > 0
-                ? { uri: raffleImage }
-                : require("../../assets/images/premierball.png") // imagem temporária, trocar + para frente
-            }
-            style={styles.raffleBackground}
-            resizeMode="cover"
-          >
-            <BlurView intensity={70} tint="light" style={styles.raffleBlur} />
-            <Image
-              source={require("../../assets/images/tokenIcon.png")}
-            ></Image>
-            <Text>{rafflePrice} Tokens</Text>
-          </ImageBackground>
+          <View style={styles.raffleBannerContainer}>
+            <ImageBackground
+              source={
+                raffleImage && raffleImage.length > 0
+                  ? { uri: raffleImage }
+                  : require("../../assets/images/backPokemonCard.jpg") // imagem temporária, trocar + para frente
+              }
+              style={styles.raffleBackground}
+              resizeMode="cover"
+            >
+              <BlurView intensity={70} tint="light" style={styles.raffleBlur} />
+            </ImageBackground>
+            <View style={styles.raffleBannerPriceContainer}>
+              <Image
+                style={styles.raffleBannerPriceTokenIcon}
+                source={require("../../assets/images/tokenIcon.png")}
+                resizeMode="cover"
+              />
+              <Text style={styles.raffleBannerPriceText}>
+                {rafflePrice} Tokens
+              </Text>
+            </View>
+          </View>
+        </Pressable>
+        <Pressable style={styles.myCardsButton} onPress={() => {console.log("congrats, you find a button")}}>
+          <Text style={styles.myCardsText}>Minhas {"\n"}Cartas</Text>
+          <Image
+            style={styles.myCardsIcon}
+            source={require("../../assets/images/cardsIcon.png")}
+            resizeMode="contain"
+          />
         </Pressable>
       </View>
     </View>
@@ -451,9 +467,12 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   tcgCardStoreContainer: {
+    width: "100%",
+    backgroundColor: "#ACC9F6",
+    overflow: "visible",
     alignItems: "center",
     paddingVertical: 40,
-    gap: 20,
+    gap: 30,
   },
   tcgCardStoreTitle: {
     fontWeight: 700,
@@ -489,6 +508,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     color: "#0000ff",
   },
+  raffleBannerContainer: {
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+    borderWidth: 2,
+    borderColor: "#000000",
+    borderRadius: 5,
+    overflow: "visible",
+  },
   raffleBackground: {
     width: 201,
     height: 284,
@@ -499,9 +528,53 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "row",
-    gap: 5,
   },
   raffleBlur: {
     ...StyleSheet.absoluteFillObject,
+  },
+  raffleBannerPriceContainer: {
+    position: "absolute",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 7,
+  },
+  raffleBannerPriceTokenIcon: {
+    width: 35,
+    height: 35,
+  },
+  raffleBannerPriceText: {
+    fontWeight: 400,
+    fontSize: 9.42798,
+    lineHeight: 11,
+    display: "flex",
+    alignItems: "center",
+    color: "#000000",
+  },
+
+  myCardsButton: {
+    marginTop: 30,
+    width: 272,
+    height: 83,
+    backgroundColor: "#FD7932",
+    borderWidth: 2,
+    borderColor: "#000000",
+    borderRadius: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  myCardsText: {
+    width: "75%",
+    height: "auto",
+    fontWeight: 700,
+    fontSize: 20,
+    lineHeight: 24,
+    textAlign: "center",
+    color: "#000000",
+  },
+  myCardsIcon: {
+    height: "70%",
+    width: "25%",
   },
 });

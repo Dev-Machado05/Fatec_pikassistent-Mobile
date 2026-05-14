@@ -18,8 +18,8 @@ export default function _layout() {
   return (
     <View style={styles.homeContainer}>
       <Header onMenuPress={handleMenuPress} />
+      <SideBar isVisible={menuState} />
       <ScrollView style={styles.homeContent}>
-        <SideBar isVisible={menuState} />
         <Slot />
       </ScrollView>
       <FastAccess />
@@ -58,5 +58,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f79b69",
     borderRadius: 50,
   },
-  homeContent: {},
+  homeContent: {
+    flex: 1,
+  },
 });

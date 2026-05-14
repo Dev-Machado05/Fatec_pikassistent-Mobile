@@ -14,12 +14,12 @@ export default function _layout() {
   return (
     <View style={styles.chatBotContainer}>
       <Header onMenuPress={handleMenuPress} />
+      <SideBar isVisible={pressedMenuButton} />
       <ScrollView
         keyboardShouldPersistTaps="handled"
         style={styles.chatBotContent}
         contentContainerStyle={styles.chatBotContentContainer}
       >
-        <SideBar isVisible={pressedMenuButton} />
         <Slot />
       </ScrollView>
     </View>
