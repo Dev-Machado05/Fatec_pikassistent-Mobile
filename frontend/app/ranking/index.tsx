@@ -61,62 +61,106 @@ export default function RankingScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    padding: 20
-  },
-  center: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff'
+    backgroundColor: '#0F102C',
+    width: '100%',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 30,
-    paddingTop: 20
+    paddingHorizontal: 20,
+    paddingTop: 50,
+    paddingBottom: 20,
+    backgroundColor: '#1C242F',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e7775e',
   },
   backButton: {
     fontSize: 28,
     color: '#e7775e',
-    paddingHorizontal: 10
+    paddingHorizontal: 10,
   },
   title: {
     fontSize: 22,
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  rankingList: {
+    padding: 16,
   },
   rankingItem: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-    backgroundColor: '#f9f9f9',
-    marginBottom: 5,
-    borderRadius: 8
+    backgroundColor: '#1C242F',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#e7775e',
   },
   rank: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#e7775e',
-    width: 40
+    width: 50,
+  },
+  rankGold: {
+    fontSize: 24,
+    color: '#FFD700',
+    width: 50,
+  },
+  rankSilver: {
+    fontSize: 24,
+    color: '#C0C0C0',
+    width: 50,
+  },
+  rankBronze: {
+    fontSize: 24,
+    color: '#CD7F32',
+    width: 50,
+  },
+  avatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#e7775e',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 15,
+  },
+  avatarText: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  info: {
+    flex: 1,
   },
   name: {
     fontSize: 16,
-    flex: 1,
-    textTransform: 'capitalize'
+    fontWeight: 'bold',
+    color: '#fff',
+    textTransform: 'capitalize',
   },
   score: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333'
+    fontSize: 14,
+    color: '#e7775e',
+    marginTop: 4,
+  },
+  medalIcon: {
+    width: 30,
+    fontSize: 24,
+  },
+  center: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#0F102C',
   },
   emptyText: {
     textAlign: 'center',
     marginTop: 50,
     fontSize: 16,
-    color: '#666'
-  }
+    color: '#aaa',
+  },
 });

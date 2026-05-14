@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getDailyPokemons, getTodayCompletedCount, hasCompletedPokemon, Pokemon, saveDailyProgress, saveScoreToFirebase } from '../../services/gameService';
 import { router } from 'expo-router';
 import { auth } from '@/assets/services/firebaseConfig';
+import { ImageBackground } from 'react-native';
 
 export default function GameScreen() {
   const [dailyPokemons, setDailyPokemons] = useState<Pokemon[]>([]);
@@ -188,193 +189,238 @@ export default function GameScreen() {
   if (!currentPokemon) return null;
   
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.push('/home')}>
-          <Text style={styles.backButton}>←</Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>Qual é esse Pokémon?</Text>
-        <Text style={styles.score}>⭐ {score}</Text>
-      </View>
-      
-      <Text style={styles.progress}>
-        Pokémon {currentIndex + 1} de {dailyPokemons.length}
-      </Text>
-      
-      <View style={styles.progressContainer}>
-        {dailyPokemons.map((_, idx) => (
-          <View key={idx} style={styles.progressDot}>
-            <Text style={idx <= currentIndex ? styles.progressActive : styles.progressInactive}>
-              {idx < currentIndex ? '✅' : '⬜'}
-            </Text>
-          </View>
-        ))}
-      </View>
+    <ImageBackground 
+      source={require('../../assets/images/Bg2.png')}  // Ajuste o caminho
+      style={styles.container}
+      resizeMode="cover"  
+    > 
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.push('/home')}>
+            <Text style={styles.backButton}>←</Text>
+          </TouchableOpacity>
+          <Text style={styles.title}>Qual é esse Pokémon?</Text>
+          <Text style={styles.score}>⭐ {score}</Text>
+        </View>
+        
+        <Text style={styles.progress}>
+          Pokémon {currentIndex + 1} de {dailyPokemons.length}
+        </Text>
+        
+        <View style={styles.progressContainer}>
+          {dailyPokemons.map((_, idx) => (
+            <View key={idx} style={styles.progressDot}>
+              <Text style={idx <= currentIndex ? styles.progressActive : styles.progressInactive}>
+                {idx < currentIndex ? '✅' : '⬜'}
+              </Text>
+            </View>
+          ))}
+        </View>
 
-      <Image 
-        source={{ uri: currentPokemon.sprite }}
-        style={[styles.silhouette, revealed && styles.revealed]}
-        resizeMode="contain"
-      />
-      
-      {!revealed && attempts > 0 && (
-        <View style={styles.hintsContainer}>
-          <Text style={styles.hint}>{getHint()}</Text>
-        </View>
-      )}
-      
-      {!revealed && (
-        <>
-          <TextInput
-            style={styles.input}
-            value={input}
-            onChangeText={setInput}
-            placeholder="Digite o nome do Pokémon..."
-            autoCapitalize="none"
-            autoCorrect={false}
-          />
-          
-          <TouchableOpacity style={styles.button} onPress={checkGuess}>
-            <Text style={styles.buttonText}>Adivinhar</Text>
-          </TouchableOpacity>
-          
-          <Text style={styles.attempts}>
-            Tentativas: {attempts}/5
-          </Text>
-        </>
-      )}
-      
-      {revealed && (
-        <View style={styles.revealedContainer}>
-          <Text style={styles.revealedName}>{currentPokemon.name}</Text>
-          <TouchableOpacity style={styles.button} onPress={nextPokemon}>
-            <Text style={styles.buttonText}>Próximo →</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-    </View>
+        <Image 
+          source={{ uri: currentPokemon.sprite }}
+          style={[styles.silhouette, revealed && styles.revealed]}
+          resizeMode="contain"
+        />
+        
+        {!revealed && attempts > 0 && (
+          <View style={styles.hintsContainer}>
+            <Text style={styles.hint}>{getHint()}</Text>
+          </View>
+        )}
+        
+        {!revealed && (
+          <>
+            <TextInput
+              style={styles.input}
+              value={input}
+              onChangeText={setInput}
+              placeholder="Digite o nome do Pokémon..."
+              autoCapitalize="none"
+              autoCorrect={false}
+              placeholderTextColor="#e5e5e5"
+            />
+            
+            <TouchableOpacity style={styles.button} onPress={checkGuess}>
+              <Text style={styles.buttonText}>Adivinhar</Text>
+            </TouchableOpacity>
+            
+            <Text style={styles.attempts}>
+              Tentativas: {attempts}/5
+            </Text>
+          </>
+        )}
+        
+        {revealed && (
+          <View style={styles.revealedContainer}>
+            <Text style={styles.revealedName}>{currentPokemon.name}</Text>
+            <TouchableOpacity style={styles.button} onPress={nextPokemon}>
+              <Text style={styles.buttonText}>Próximo →</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>   
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  container: { 
     flex: 1,
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#fff'
+    width: '100%',
   },
-  center: {
+  center: { 
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff'
+    backgroundColor: '#0F102C',
   },
-  header: {
+  header: { 
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    width: '100%',
-    marginBottom: 20
+    paddingHorizontal: 20,
+    paddingTop: 50,
+    paddingBottom: 20,
+    backgroundColor: '#1C242F',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e7775e',
   },
   backButton: {
     fontSize: 28,
     color: '#e7775e',
-    paddingHorizontal: 10
+    paddingHorizontal: 10,
   },
   title: {
     fontSize: 18,
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    color: '#fff',
   },
   score: {
     fontSize: 18,
+    fontWeight: 'bold',
     color: '#e7775e',
-    fontWeight: 'bold'
   },
   progress: {
     fontSize: 14,
-    color: '#666',
-    marginBottom: 30
+    fontWeight: 'bold',
+    color: '#aaa',
+    textAlign: 'center',
+    marginVertical: 15,
+  },
+  pokemonCard: {
+    backgroundColor: '#1C242F',
+    borderRadius: 24,
+    marginHorizontal: 20,
+    padding: 24,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#e7775e',
   },
   silhouette: {
     width: 250,
     height: 250,
     tintColor: '#000',
-    marginBottom: 30
+    marginBottom: 30,
+    alignSelf: 'center',
   },
   revealed: {
-    tintColor: undefined
+    tintColor: undefined,
   },
   hintsContainer: {
-    backgroundColor: '#f5f5f5',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 20,
-    width: '100%'
+    backgroundColor: '#0F102C',
+    borderRadius: 16,
+    padding: 16,
+    marginHorizontal: 20,
+    marginVertical: 10,
+    borderWidth: 1,
+    borderColor: '#e7775e',
   },
   hint: {
     fontSize: 16,
-    textAlign: 'center'
+    color: '#fff',
+    textAlign: 'center',
   },
   input: {
-    width: '100%',
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
+    backgroundColor: '#1C242F',
+    borderRadius: 30,
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    marginHorizontal: 20,
+    marginVertical: 10,
     fontSize: 16,
-    marginBottom: 20,
-    backgroundColor: '#fafafa'
+    color: '#fff',
+    borderWidth: 1,
+    borderColor: '#e7775e',
   },
   button: {
     backgroundColor: '#e7775e',
-    paddingHorizontal: 40,
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginBottom: 20
+    marginHorizontal: 20,
+    marginVertical: 10,
+    paddingVertical: 14,
+    borderRadius: 30,
+    alignItems: 'center',
   },
   buttonText: {
     color: '#fff',
     fontSize: 18,
-    fontWeight: 'bold'
+    fontWeight: 'bold',
   },
   attempts: {
+    textAlign: 'center',
+    fontWeight: 'bold',
     fontSize: 14,
-    color: '#666'
+    color: '#aaa',
+    marginBottom: 20,
   },
   finishedTitle: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 20
+    color: '#fff',
+    marginBottom: 20,
+    textAlign: 'center',
   },
   finishedScore: {
     fontSize: 20,
-    marginBottom: 30
+    color: '#e7775e',
+    marginBottom: 30,
+    textAlign: 'center',
   },
   revealedContainer: {
     alignItems: 'center',
-    marginTop: 20
+    marginTop: 20,
+    marginHorizontal: 20,
+    padding: 20,
+    backgroundColor: '#1C242F',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: '#e7775e',
   },
   revealedName: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     textTransform: 'capitalize',
-    marginBottom: 20
+    color: '#fff',
+    marginBottom: 20,
   },
   progressContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     gap: 20,
-    marginBottom: 20
+    marginVertical: 20,
   },
   progressDot: {
-    width: 40,
-    alignItems: 'center'
+    width: 50,
+    alignItems: 'center',
+    backgroundColor: '#1C242F',
+    borderRadius: 25,
+    paddingVertical: 8,
   },
   progressActive: {
-    fontSize: 20
+    fontSize: 20,
   },
   progressInactive: {
     fontSize: 20,
-    opacity: 0.3
-  }
+    opacity: 0.3,
+  },
 });
