@@ -11,7 +11,9 @@ import {
   Text,
   TextInput,
   View,
+  ImageSourcePropType,
 } from "react-native";
+import PokemonCardPopUp from "./helper/pokemonCardPopUp";
 import { BlurView } from "expo-blur";
 import PokedexCarroussel from "./components/homePokedexCarroussel/homePokedexCarroussel";
 import { useRouter } from "expo-router";
@@ -45,7 +47,16 @@ export default function home() {
   const [tokenAmount, setTokenAmount] = useState<number>(0);
   const [userInventoryLoading, setUserInventoryLoading] =
     useState<boolean>(false);
-  const [rafflePrice, setRafflePrice] = useState(5);
+  const [buttonPressed, setButtonPressed] = useState<boolean>(false);
+  const [rafflePrice, setRafflePrice] = useState<number>(5);
+  const [showNewCard, setShowNewCard] = useState<boolean>(false);
+  const [cardData, setCardData] = useState<{
+    id: string;
+    name: string;
+    image: ImageSourcePropType;
+    rarity: string;
+    quantity: number;
+  } | null>(null);
 
   // Pegue userID e userName diretamente do hook
   let { userID, userName } = useAuth();
@@ -154,7 +165,6 @@ export default function home() {
   }
 
   async function handleRollCard() {
-    console.log("comando iniciado");
     console.log(userID);
     try {
       if (!userID) {
@@ -162,7 +172,6 @@ export default function home() {
         return;
       }
 
-      console.log("iniciando fetch");
       const response = await fetch(`${API_URL}/api/rollCard`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -172,7 +181,6 @@ export default function home() {
         }),
       });
 
-      console.log("final fetch");
       let data: any = null;
       if (response.ok) {
         data = await response.json();
@@ -182,8 +190,28 @@ export default function home() {
           data?.cardResp?.imagem ||
           data?.data?.image_url ||
           "";
-        console.log("arrumando imagem");
         setRaffleImage(img || "");
+        // build new card data and show popup
+        try {
+          const imageSource = img
+            ? typeof img === "string"
+              ? { uri: img }
+              : img
+            : require("../../assets/images/backPokemonCard.jpg");
+          const newCard = {
+            id: data?.cardResp?.id || data?.cardResp?.codigo || "new",
+            name:
+              data?.cardResp?.name || data?.cardResp?.nome || data?.data?.name || "Carta",
+            image: imageSource as ImageSourcePropType,
+            rarity: data?.cardResp?.rarity || data?.cardResp?.raridade || "N/A",
+            quantity: typeof data?.quantity === "number" ? data.quantity : 1,
+          };
+          setCardData(newCard);
+          console.log(newCard)
+          setShowNewCard(true);
+        } catch (e) {
+          console.warn("Erro ao montar dados da carta:", e);
+        }
         // Atualiza o tokenAmount com o valor retornado do backend, se existir
         if (typeof data.tokenAmount === "number") {
           setTokenAmount(data.tokenAmount);
@@ -197,15 +225,17 @@ export default function home() {
             errorMsg = errData.error;
           }
         } catch (e) {
-          // resposta não era JSON
+          console.warn("Erro ao sortear carta. Tente novamente mais tarde.")
         }
         console.error("Erro ao sortear carta:", errorMsg);
         setRaffleImage("");
         // Opcional: exibir erro para o usuário
         // alert(errorMsg);
       }
+      setButtonPressed(false);
     } catch (error) {
       console.error("Erro ao sortear carta:", error);
+      setButtonPressed(false);
       setRaffleImage("");
     }
   }
@@ -324,16 +354,16 @@ export default function home() {
         <Pressable
           style={styles.raffleContainer}
           onPress={() => {
-            console.log("buttonPressed");
+            setButtonPressed(true);
             handleRollCard();
-          }} /*disabled={!userID}*/
+          }} disabled={buttonPressed}
         >
           <View style={styles.raffleBannerContainer}>
             <ImageBackground
               source={
                 raffleImage && raffleImage.length > 0
                   ? { uri: raffleImage }
-                  : require("../../assets/images/backPokemonCard.jpg") // imagem temporária, trocar + para frente
+                  : require("../../assets/images/backPokemonCard.jpg")
               }
               style={styles.raffleBackground}
               resizeMode="cover"
@@ -361,6 +391,7 @@ export default function home() {
           />
         </Pressable>
       </View>
+      <PokemonCardPopUp cardData={cardData} visible={showNewCard} onClose={() => { setShowNewCard(false); setCardData(null); }} />
     </View>
   );
 }

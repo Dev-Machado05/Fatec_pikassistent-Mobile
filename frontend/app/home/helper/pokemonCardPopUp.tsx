@@ -1,29 +1,38 @@
-import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import { Image, ImageSourcePropType, Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import React from "react";
 
-type alertType = {
-  content: string;
-  messageType: "error" | "success";
+type CardType = {
+  id: string;
+  name: string;
+  image: ImageSourcePropType;
+  rarity: string;
+  quantity: number;
 };
 
-export default function AlertPopUp({
+export default function PokemonCardPopUp({
   cardData,
-  showNewCard,
-  onButtonClick,
+  visible,
+  onClose,
 }: {
-  cardData: any;
-  showNewCard: boolean;
-  onButtonClick: () => void;
+  cardData: CardType | null;
+  visible: boolean;
+  onClose: () => void;
 }) {
+  if (!cardData) return null;
+
   return (
-    <Modal
-      visible={showNewCard}
-      transparent
-      animationType="fade"
-      onRequestClose={onButtonClick}
-    >
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <View style={styles.newCardContainer}>
-        
+        <View style={styles.popUpContent}>
+          <Text style={styles.popUpTitle}>Sucesso!</Text>
+          <Text style={styles.popUpMessage}>Você conseguiu um: {cardData.name}</Text>
+          <Image source={cardData.image} style={{ width: 180, height: 240, alignSelf: "center" }} resizeMode="contain" />
+          <Text style={styles.popUpMessage}>Raridade: {cardData.rarity}</Text>
+          <Text style={styles.popUpMessage}>Quantidade no inventário: {cardData.quantity}</Text>
+          <Pressable style={styles.popUpSuccessButton} onPress={onClose}>
+            <Text style={styles.popUpButtonText}>Fechar</Text>
+          </Pressable>
+        </View>
       </View>
     </Modal>
   );

@@ -2,6 +2,7 @@ import { Slot, useSegments } from "expo-router";
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import ReturnButton from "./helper/ReturnButton";
 
 const titleByRoute: Record<string, string> = {
   login: "Login",
@@ -21,6 +22,7 @@ export default function AuthLayout() {
         <Text style={styles.headerTitle}>{title}</Text>
       </View>
       <View style={styles.content}>
+      <ReturnButton/>
         <Slot />
       </View>
         <View style={[styles.footer, { paddingBottom: insets.bottom }]}>
@@ -51,7 +53,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     width: "100%",
-    height: "auto",
+    height: "8%",
     backgroundColor: "#58A8C0",
     borderBottomWidth: 1,
     borderBottomColor: "black",

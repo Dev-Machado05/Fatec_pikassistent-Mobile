@@ -279,6 +279,7 @@ app.post("/api/rollCard", async (req, res) => {
       name: data.data.name,
       number: data.data.number,
       image: data.data.image_url,
+      rarity: data.data.rarity
     };
 
     // Corrige para userId
