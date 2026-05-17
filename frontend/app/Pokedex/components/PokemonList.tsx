@@ -16,11 +16,14 @@ type Pokemon = {
 };
 
 export default function PokemonList({
-  onSelect,
+  onSelect, 
+  searchedText,
 }: {
   onSelect: (pokemonId: string) => void;
+  searchedText: string
 }) {
   const [pokemons, setPokemons] = useState<Pokemon[]>([]);
+  const [searchedPokemon, setSearchedPokemon] = useState<Pokemon[]>([]);
   const [nextUrl, setNextUrl] = useState<string | null>(
     "https://pokeapi.co/api/v2/pokemon?limit=20",
   );
@@ -56,11 +59,50 @@ export default function PokemonList({
 
   useEffect(() => {
     loadPokemons(); // carrega a primeira página
-  }, [loadPokemons]);
+  }, [loadPokemons, ]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function getSearchedPokemon() {
+      try {
+        const query = searchedText.trim().toLowerCase();
+
+        if (!query) {
+          if (!cancelled) setSearchedPokemon([]);
+          return;
+        }
+
+        const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${query}`);
+
+        if (!res.ok) {
+          if (!cancelled) setSearchedPokemon([]);
+          return;
+        }
+
+        const pokemon = await res.json();
+        const formatted: Pokemon = {
+          id: String(pokemon.id),
+          name: pokemon.name,
+          image: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemon.id}.png`,
+        };
+
+        if (!cancelled) setSearchedPokemon([formatted]);
+      } catch {
+        if (!cancelled) setSearchedPokemon([]);
+      }
+    }
+
+    getSearchedPokemon();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [searchedText]);
 
   return (
     <FlatList
-      data={pokemons}
+      data={searchedText.trim() ? searchedPokemon : pokemons}
       keyExtractor={(item) => item.id}
       style={styles.pokemonListStyle}
       contentContainerStyle={styles.pokemonListContainer}

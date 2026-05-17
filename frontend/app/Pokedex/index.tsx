@@ -20,12 +20,22 @@ export default function Pokedex() {
     width: 96,
     height: 96,
   });
+  const [searchText, setSearchText] = useState<string>("");
 
   useEffect(() => {
     fetch(`https://pokeapi.co/api/v2/pokemon/${selectedPokemonID}`)
       .then((res) => res.json())
       .then((data) => setPokemon(data));
   }, [selectedPokemonID]);
+
+  const handleSearchTextChange = (text: string) => {
+    setSearchText(text);
+
+    const trimmedText = text.trim();
+    if (!/^\d+$/.test(trimmedText)) return;
+
+    setSelectedPokemonID(trimmedText);
+  };
 
   const changeSelectedPokemon = (id: string) => {
     console.log(id);
@@ -84,7 +94,9 @@ export default function Pokedex() {
             android_ripple={{ color: "#00000020" }}
             style={({ pressed }) => ({ opacity: pressed ? 0.75 : 1 })}
           >
-            <Text style={[styles.pokedexTopText, styles.pokedexTopLink]}>Clique aqui para ver mais</Text>
+            <Text style={[styles.pokedexTopText, styles.pokedexTopLink]}>
+              Clique aqui para ver mais
+            </Text>
           </Pressable>
         </View>
       </View>
@@ -97,9 +109,13 @@ export default function Pokedex() {
             style={styles.pokedexSearchInput}
             placeholder="Procurar..."
             placeholderTextColor="#e7775e"
+            onChangeText={handleSearchTextChange}
           />
         </View>
-        <PokemonList onSelect={(id) => changeSelectedPokemon(id)} />
+        <PokemonList
+          onSelect={(id) => changeSelectedPokemon(id)}
+          searchedText={searchText}
+        />
       </View>
     </ImageBackground>
   );
