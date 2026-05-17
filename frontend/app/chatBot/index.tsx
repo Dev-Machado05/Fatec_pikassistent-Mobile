@@ -125,40 +125,57 @@ export default function index() {
     source={require("../../assets/images/Bg2.png")}
     resizeMode="cover"
   >
-    <ScrollView contentContainerStyle={styles.messagesContainer}>
+      <ScrollView contentContainerStyle={styles.messagesContainer}>
       {messages.map((item) => (
         <View
           key={item.id}
           style={
             item.sender === "user"
-              ? styles.userMessagecontent
-              : styles.botMessagecontent
+              ? styles.actUserMessage
+              : styles.messageContainer
           }
         >
-          <Text
-            style={[
-              styles.messageText,
+          <View
+            style={
               item.sender === "user"
-                ? styles.userMessageText
-                : styles.botMessageText,
-            ]}
+                ? styles.actUserMessageContent
+                : styles.messageContent
+            }
           >
-            {item.message}
-          </Text>
-
-          {item.sender === "user" ? (
-            <Image
-              style={styles.messageIcon}
-              source={require("../../assets/images/masterBall.png")}
-              resizeMode="contain"
-            />
-          ) : (
-            <Image
-              style={styles.messageIcon}
-              source={require("../../assets/images/pika.png")}
-              resizeMode="contain"
-            />
-          )}
+            {item.sender === "user" ? (
+              <>
+                <Text
+                  style={[
+                    styles.messageText,
+                    styles.userMessageText,
+                  ]}
+                >
+                  {item.message}
+                </Text>
+                <Image
+                  style={styles.messageIcon}
+                  source={require("../../assets/images/masterBall.png")}
+                  resizeMode="contain"
+                />
+              </>
+            ) : (
+              <>
+                <Image
+                  style={styles.messageIcon}
+                  source={require("../../assets/images/pika.png")}
+                  resizeMode="contain"
+                />
+                <Text
+                  style={[
+                    styles.messageText,
+                    styles.botMessageText,
+                  ]}
+                >
+                  {item.message}
+                </Text>
+              </>
+            )}
+          </View>
         </View>
       ))}
     </ScrollView>
@@ -191,6 +208,34 @@ const styles = StyleSheet.create({
   messagesContainer: {
     padding: 15,
     paddingBottom: 100,
+  },
+
+  messageContainer: {
+    alignSelf: "flex-start",
+    flexDirection: "row-reverse",
+    marginVertical: 10,
+    maxWidth: "100%",
+  },
+
+  actUserMessage: {
+    alignSelf: "flex-end",
+    flexDirection: "row",
+    marginVertical: 10,
+    maxWidth: "100%",
+  },
+
+  messageContent: {
+    maxWidth: "75%",
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 10,
+  },
+
+  actUserMessageContent: {
+    maxWidth: "75%",
+    flexDirection: "row-reverse",
+    alignItems: "center",
+    gap: 10,
   },
 
   userMessagecontent: {
