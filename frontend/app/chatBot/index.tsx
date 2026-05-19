@@ -142,38 +142,29 @@ export default function index() {
                 : styles.messageContent
             }
           >
-            {item.sender === "user" ? (
-              <>
-                <Text
-                  style={[
-                    styles.messageText,
-                    styles.userMessageText,
-                  ]}
-                >
-                  {item.message}
-                </Text>
-                <Image
-                  style={styles.messageIcon}
-                  source={require("../../assets/images/masterBall.png")}
-                  resizeMode="contain"
-                />
-              </>
-            ) : (
-              <>
-                <Image
-                  style={styles.messageIcon}
-                  source={require("../../assets/images/pika.png")}
-                  resizeMode="contain"
-                />
-                <Text
-                  style={[
-                    styles.messageText,
-                    styles.botMessageText,
-                  ]}
-                >
-                  {item.message}
-                </Text>
-              </>
+            {item.sender !== "user" && (
+              <Image
+                source={require("../../assets/images/pika.png")}
+                style={styles.messageIcon}
+                resizeMode="contain"
+              />
+            )}
+
+            <Text
+              style={[
+                styles.messageText,
+                item.sender === "user" ? styles.userMessageText : styles.botMessageText,
+              ]}
+            >
+              {item.message}
+            </Text>
+
+            {item.sender === "user" && (
+              <Image
+                style={styles.messageIcon}
+                source={require("../../assets/images/masterBall.png")}
+                resizeMode="contain"
+              />
             )}
           </View>
         </View>
@@ -233,7 +224,7 @@ const styles = StyleSheet.create({
 
   actUserMessageContent: {
     maxWidth: "75%",
-    flexDirection: "row-reverse",
+    flexDirection: "row",
     alignItems: "center",
     gap: 10,
   },
