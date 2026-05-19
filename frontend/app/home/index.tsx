@@ -382,7 +382,7 @@ export default function home() {
             </View>
           </View>
         </Pressable>
-        <Pressable style={styles.myCardsButton} onPress={() => {console.log("congrats, you find a button")}}>
+        <Pressable style={styles.myCardsButton} onPress={() => {router.push("/cardInventory")}}>
           <Text style={styles.myCardsText}>Minhas {"\n"}Cartas</Text>
           <Image
             style={styles.myCardsIcon}
