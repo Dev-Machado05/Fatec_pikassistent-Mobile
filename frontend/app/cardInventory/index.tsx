@@ -9,6 +9,7 @@ import {
 import React, { useEffect, useState } from "react";
 import useAuth from "@/assets/hooks/useAuth";
 import { useRouter } from "expo-router";
+import cardRarityTypes from "./helper/getCardsRarity";
 
 export default function cardInventory() {
   const router = useRouter();
@@ -17,8 +18,34 @@ export default function cardInventory() {
   ).replace(/\/$/, "");
   const [cardsList, setCardsList] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-
+  const [search, setSearch] = useState("");
+  const [rarityFilter, setRarityFilter] = useState("all");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [showFilterMenu, setShowFilterMenu] = useState(false);
+  
   const { userID } = useAuth();
+  
+  const rarityOptions = cardRarityTypes.map((r) => String(r).toLowerCase());
+
+  const filteredCards = cardsList
+    .filter((card) => {
+      const name = String(card.name ?? "").toLowerCase();
+      const rarity = String(card.rarity ?? "").toLowerCase();
+      const query = search.trim().toLowerCase();
+
+      const matchesSearch = !query || name.includes(query);
+      const matchesRarity = rarityFilter === "all" || rarity === rarityFilter;
+
+      return matchesSearch && matchesRarity;
+    })
+    .sort((leftCard, rightCard) => {
+      const leftName = String(leftCard.name ?? "").toLowerCase();
+      const rightName = String(rightCard.name ?? "").toLowerCase();
+
+      return sortOrder === "asc"
+        ? leftName.localeCompare(rightName, "pt-BR")
+        : rightName.localeCompare(leftName, "pt-BR");
+    });
 
   useEffect(() => {
     async function getCardList() {
@@ -27,7 +54,6 @@ export default function cardInventory() {
         const res = await fetch(`${API_URL}/api/users/${userID}/cards`);
         const data = await res.json();
 
-        console.log(data);
         setCardsList(data.inventory);
       } catch (error) {
         console.error(error);
@@ -46,32 +72,81 @@ export default function cardInventory() {
     <View style={styles.cardInventoryContainer}>
       <Text style={styles.cardInventoryTitle}>Minhas Cartas</Text>
       <View style={styles.cardInventoryNavBar}>
-        <Pressable style={styles.filterContainer}>
-          <Image
-            source={require("../../assets/images/filter.png")}
-            style={styles.filterIcon}
-          />
-          <Text style={styles.filterLabel}>Filtro</Text>
-        </Pressable>
-        <SearchBar />
+        <SearchBar value={search} onChangeText={setSearch} />
+        <View style={styles.cardInventoryNavBarContent}>
+          <Pressable
+            style={styles.filterContainer}
+            onPress={() => setSortOrder((current) => (current === "asc" ? "desc" : "asc"))}
+          >
+            <Image
+              source={require("../../assets/images/sortIcon.png")}
+              style={styles.filterIcon}
+            />
+            <Text style={styles.filterLabel}>
+              Ordenar: {sortOrder === "asc" ? "Asc" : "Desc"}
+            </Text>
+          </Pressable>
+          <View style={styles.filterWrapper}>
+            <Pressable
+              style={styles.filterContainer}
+              onPress={() => setShowFilterMenu((s) => !s)}
+            >
+              <Image
+                source={require("../../assets/images/filter.png")}
+                style={styles.filterIcon}
+              />
+              <Text style={styles.filterLabel}>
+                Filtro: {rarityFilter === "all" ? "Todos" : rarityFilter.charAt(0).toUpperCase() + rarityFilter.slice(1)}
+              </Text>
+            </Pressable>
+          </View>
+        </View>
       </View>
+      {showFilterMenu && (
+        <View style={styles.filterPanel}>
+          {rarityOptions.map((opt) => (
+            <Pressable
+              key={opt}
+              style={styles.filterMenuItem}
+              onPress={() => {
+                setRarityFilter(opt);
+                setShowFilterMenu(false);
+              }}
+            >
+              <View style={styles.radioOuter}>
+                {opt === rarityFilter && <View style={styles.radioInner} />}
+              </View>
+              <Text style={styles.filterMenuLabel}>
+                {opt === 'all' ? 'Todos' : opt.charAt(0).toUpperCase() + opt.slice(1)}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+      )}
       <View style={styles.cardInventoryContent}>
         {loading ? (
           <Text>Carregando...</Text>
-        ) : cardsList.length > 0 ? (
-          cardsList.map((card, index) => (
+        ) : filteredCards.length > 0 ? (
+          filteredCards.map((card, index) => (
             <View key={card.id ?? index} style={styles.cardContainer}>
               <Text style={styles.cardTitle}>{card.name}</Text>
               <Image
                 source={{ uri: card.image }}
                 resizeMode={"contain"}
                 style={styles.cardImage}
+                alt={`imagem ${card.name}`}
               />
               <View style={styles.cardInfoContainer}>
                 <Text style={styles.cardText}>
-                  {card.rarity ? card.rarity : "unset"}
+                  Raridade:{" "}
+                  <Text style={styles.cardTextHightLight}>
+                    {card.rarity ? card.rarity : "unset"}
+                  </Text>
                 </Text>
-                <Text style={styles.cardText}>{card.quantity}</Text>
+                <Text style={styles.cardText}>
+                  Quantidade:{" "}
+                  <Text style={styles.cardTextHightLight}>{card.quantity}</Text>
+                </Text>
               </View>
             </View>
           ))
@@ -83,17 +158,25 @@ export default function cardInventory() {
   );
 }
 
-function SearchBar() {
+function SearchBar({
+  value,
+  onChangeText,
+}: {
+  value: string;
+  onChangeText: (text: string) => void;
+}) {
   return (
     <View style={styles.searchBarContainer}>
       <Image
-        source={require("../../assets/images/filter.png")}
+        source={require("../../assets/images/searchIcon.png")}
         style={styles.searchBarIcon}
       />
       <TextInput
         style={styles.searchBarInput}
         placeholder="Pesquisar"
         placeholderTextColor="#888888"
+        value={value}
+        onChangeText={onChangeText}
       />
     </View>
   );
@@ -113,8 +196,15 @@ const styles = StyleSheet.create({
   cardInventoryNavBar: {
     width: "100%",
     gap: 15,
-    flexDirection: "row",
+    flexDirection: "column",
+    alignItems: "center",
+    paddingHorizontal: 10,
+  },
+  cardInventoryNavBarContent: {
+    width: "100%",
     alignItems: "flex-start",
+    justifyContent: "space-evenly",
+    flexDirection: "row",
   },
   filterContainer: {
     flexDirection: "row",
@@ -127,6 +217,58 @@ const styles = StyleSheet.create({
   },
   filterLabel: {
     fontSize: 15,
+  },
+  filterWrapper: {
+    position: "relative",
+  },
+  filterMenu: {
+    backgroundColor: "#ffffff",
+    borderWidth: 1,
+    borderColor: "#CCCCCC",
+    borderRadius: 8,
+    padding: 8,
+    width: "100%",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+  },
+  filterMenuItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 6,
+    width: "48%",
+  },
+  radioOuter: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#444444",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 8,
+  },
+  radioInner: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#444444",
+  },
+  filterMenuLabel: {
+    fontSize: 14,
+  },
+  filterPanel: {
+    width: "100%",
+    backgroundColor: "#ffffff",
+    borderWidth: 1,
+    borderColor: "#CCCCCC",
+    borderRadius: 8,
+    padding: 8,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    marginTop: 8,
+    paddingHorizontal: 12,
   },
   searchBarContainer: {
     flex: 1,
@@ -157,21 +299,31 @@ const styles = StyleSheet.create({
     alignContent: "flex-start",
     paddingHorizontal: 16,
   },
-  cardTitle: {},
+  cardTitle: {
+    fontSize: 15,
+    color: "#000000",
+    fontWeight: "600",
+  },
   cardContainer: {
     width: "48%",
     padding: 15,
     marginBottom: 16,
     gap: 13,
+    alignItems: "center",
   },
   cardImage: {
     width: "100%",
     aspectRatio: 0.72,
   },
   cardInfoContainer: {
-    gap: 5,
+    width: "100%",
+    alignItems: "flex-start",
+    gap: 3,
   },
   cardText: {
     textAlign: "center",
+  },
+  cardTextHightLight: {
+    fontWeight: "600",
   },
 });
